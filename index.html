@@ -15,16 +15,47 @@
         body {
             background: linear-gradient(135deg, #6e8efb, #a777e3);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
+            padding-top: 130px;
+        }
+        
+        .sticky-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-label {
+            font-size: 14px;
+            color: #555;
+            white-space: nowrap;
         }
         
         .main-container {
             display: flex;
             width: 100%;
             max-width: 1200px;
+            margin: 0 auto;
             background-color: white;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -154,15 +185,15 @@
             margin-bottom: 25px;
         }
         
-        .control-group {
+        .control-section {
             margin-bottom: 20px;
         }
         
-        .control-group:last-child {
+        .control-section:last-child {
             margin-bottom: 0;
         }
         
-        .control-label {
+        .section-label {
             display: flex;
             justify-content: space-between;
             margin-bottom: 8px;
@@ -196,19 +227,18 @@
         }
         
         .jump-controls {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
             gap: 8px;
         }
         
         .jump-btn {
-            flex: 1;
-            min-width: 60px;
             text-align: center;
             padding: 8px 5px;
             background-color: #5a7de0;
             font-size: 14px;
+            border-radius: 5px;
+            min-width: 0;
         }
         
         .negative {
@@ -308,6 +338,19 @@
             text-align: center;
         }
         
+        .voice-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        select {
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 2px solid #ddd;
+            background: white;
+        }
+        
         @media (max-width: 900px) {
             .main-container {
                 flex-direction: column;
@@ -318,6 +361,16 @@
                 border-bottom: 1px solid #eee;
                 order: -1;
             }
+            
+            .sticky-header {
+                padding: 10px 15px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            body {
+                padding-top: 180px;
+            }
         }
         
         @media (max-width: 600px) {
@@ -326,22 +379,66 @@
             }
             
             .jump-controls {
-                flex-direction: column;
+                grid-template-columns: repeat(4, 1fr);
             }
             
             button {
-                padding: 12px;
+                padding: 8px 16px;
             }
             
             .jump-btn {
-                min-width: 50px;
                 font-size: 12px;
                 padding: 6px 3px;
+            }
+            
+            .sticky-header {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding: 8px 12px;
+            }
+            
+            .control-buttons {
+                flex-wrap: nowrap;
+            }
+            
+            .control-group {
+                flex-shrink: 0;
+            }
+            
+            body {
+                padding-top: 120px;
             }
         }
     </style>
 </head>
 <body>
+    <div class="sticky-header">
+        <div class="control-buttons">
+            <button id="speakBtn">Speak</button>
+            <button id="pauseBtn">Pause</button>
+            <button id="resumeBtn" style="display:none;">Resume</button>
+            <button id="stopBtn">Stop</button>
+        </div>
+        
+        <div class="control-group">
+            <span class="control-label">Speed:</span>
+            <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1" style="width: 100px;">
+            <span class="value" id="speedValue">1.0</span>
+        </div>
+        
+        <div class="control-group">
+            <span class="control-label">Word Nav:</span>
+            <input type="range" id="wordSlider" min="0" value="0" step="1" style="width: 100px;">
+        </div>
+        
+        <div class="control-group voice-selector">
+            <span class="control-label">Voice:</span>
+            <select id="voiceSelect">
+                <option value="">Default</option>
+            </select>
+        </div>
+    </div>
+    
     <div class="main-container">
         <div class="content-area">
             <h1>Phonetics Reader</h1>
@@ -354,37 +451,22 @@
                     <button class="text-btn" id="pasteBtn">Paste from Clipboard</button>
                 </div>
                 
-                <div class="buttons">
-                    <button id="speakBtn">Speak</button>
-                    <button id="pauseBtn">Pause</button>
-                    <button id="resumeBtn">Resume</button>
-                    <button id="stopBtn">Stop</button>
-                </div>
-                
                 <div class="android-warning" id="androidWarning">
                     Word highlighting may not work on some Android devices. Try using Chrome browser for best results.
                 </div>
             </div>
             
             <div class="controls">
-                <div class="control-group">
-                    <div class="control-label">
-                        <span>Speed</span>
-                        <span class="value" id="speedValue">1.0</span>
-                    </div>
-                    <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
-                </div>
-                
-                <div class="control-group">
-                    <div class="control-label">
+                <div class="control-section">
+                    <div class="section-label">
                         <span>Volume</span>
                         <span class="value" id="volumeValue">1.0</span>
                     </div>
                     <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
                 </div>
                 
-                <div class="control-group">
-                    <div class="control-label">
+                <div class="control-section">
+                    <div class="section-label">
                         <span>Jump by Words</span>
                     </div>
                     <div class="jump-controls">
@@ -411,12 +493,12 @@
                     </div>
                 </div>
                 
-                <div class="control-group word-slider-container">
-                    <div class="control-label">
+                <div class="control-section word-slider-container">
+                    <div class="section-label">
                         <span>Word Navigation</span>
                         <span class="value" id="wordPosition">Word 0 of 0</span>
                     </div>
-                    <input type="range" id="wordSlider" class="word-slider" min="0" value="0" step="1">
+                    <input type="range" id="wordSliderFull" class="word-slider" min="0" value="0" step="1">
                 </div>
             </div>
         </div>
@@ -425,8 +507,8 @@
             <div class="output-header">
                 <h3>Phonetics Output</h3>
                 <div class="toggle-buttons">
-                    <button id="ipaBtn" class="toggle-btn active">IPA</button>
-                    <button id="englishBtn" class="toggle-btn">English</button>
+                    <button id="ipaBtn" class="toggle-btn">IPA</button>
+                    <button id="englishBtn" class="toggle-btn active">English</button>
                 </div>
             </div>
             <div id="phoneticsOutput"></div>
@@ -443,11 +525,13 @@
             const resumeBtn = document.getElementById('resumeBtn');
             const stopBtn = document.getElementById('stopBtn');
             const speedSlider = document.getElementById('speedSlider');
+            const speedSliderSticky = document.getElementById('speedSlider');
             const speedValue = document.getElementById('speedValue');
             const volumeSlider = document.getElementById('volumeSlider');
             const volumeValue = document.getElementById('volumeValue');
             const jumpButtons = document.querySelectorAll('.jump-btn');
             const wordSlider = document.getElementById('wordSlider');
+            const wordSliderFull = document.getElementById('wordSliderFull');
             const wordPosition = document.getElementById('wordPosition');
             const wordCount = document.getElementById('wordCount');
             const phoneticsOutput = document.getElementById('phoneticsOutput');
@@ -456,6 +540,7 @@
             const clearBtn = document.getElementById('clearBtn');
             const pasteBtn = document.getElementById('pasteBtn');
             const androidWarning = document.getElementById('androidWarning');
+            const voiceSelect = document.getElementById('voiceSelect');
             
             // Check if Android device
             const isAndroid = /Android/i.test(navigator.userAgent);
@@ -470,8 +555,41 @@
             let currentWordIndex = -1;
             let isPaused = false;
             let wordStartTimes = [];
-            let showIPA = true;
+            let showIPA = false; // English by default
             let wordTimingInterval = null;
+            let voices = [];
+            
+            // Load available voices
+            function loadVoices() {
+                voices = synth.getVoices();
+                voiceSelect.innerHTML = '<option value="">Default</option>';
+                
+                // Filter for English voices and categorize by gender
+                const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
+                
+                englishVoices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = voice.name;
+                    option.textContent = voice.name;
+                    
+                    // Try to determine gender from voice name
+                    if (voice.name.includes('Female') || voice.name.includes('Woman') || voice.name.includes('Samantha')) {
+                        option.textContent += ' (Female)';
+                    } else if (voice.name.includes('Male') || voice.name.includes('Man') || voice.name.includes('Alex')) {
+                        option.textContent += ' (Male)';
+                    }
+                    
+                    voiceSelect.appendChild(option);
+                });
+            }
+            
+            // Load voices when they become available
+            if (synth.onvoiceschanged !== undefined) {
+                synth.onvoiceschanged = loadVoices;
+            }
+            
+            // Initial load
+            setTimeout(loadVoices, 100);
             
             // Check for URL parameters
             const urlParams = new URLSearchParams(window.location.search);
@@ -536,6 +654,17 @@
                     console.error('Failed to read from clipboard:', err);
                 }
             });
+            
+            // Toggle play/pause buttons
+            function togglePlayPauseButtons() {
+                if (isPaused) {
+                    pauseBtn.style.display = 'none';
+                    resumeBtn.style.display = 'inline-block';
+                } else {
+                    pauseBtn.style.display = 'inline-block';
+                    resumeBtn.style.display = 'none';
+                }
+            }
             
             // Generate simple phonetics (for demonstration)
             function generatePhonetics(text, useIPA) {
@@ -603,7 +732,9 @@
                 
                 // Set up word slider
                 wordSlider.max = words.length - 1;
+                wordSliderFull.max = words.length - 1;
                 wordSlider.value = currentWordIndex >= 0 ? currentWordIndex : 0;
+                wordSliderFull.value = currentWordIndex >= 0 ? currentWordIndex : 0;
                 
                 // Re-highlight current word if needed
                 if (currentWordIndex >= 0) {
@@ -630,6 +761,7 @@
                         
                         // Update word slider position
                         wordSlider.value = index;
+                        wordSliderFull.value = index;
                         wordPosition.textContent = `Word ${index + 1} of ${words.length}`;
                     }
                 }
@@ -691,6 +823,14 @@
                 utterance.rate = parseFloat(speedSlider.value);
                 utterance.volume = parseFloat(volumeSlider.value);
                 
+                // Set selected voice if available
+                if (voiceSelect.value) {
+                    const selectedVoice = voices.find(voice => voice.name === voiceSelect.value);
+                    if (selectedVoice) {
+                        utterance.voice = selectedVoice;
+                    }
+                }
+                
                 // Estimate word start times
                 wordStartTimes = estimateWordStartTimes(text, utterance.rate);
                 
@@ -715,6 +855,7 @@
                     currentWordIndex = -1;
                     speakBtn.textContent = 'Speak';
                     isPaused = false;
+                    togglePlayPauseButtons();
                     clearInterval(wordTimingInterval);
                 };
                 
@@ -730,6 +871,7 @@
                 synth.speak(utterance);
                 speakBtn.textContent = 'Speaking...';
                 isPaused = false;
+                togglePlayPauseButtons();
             }
             
             // Pause speaking
@@ -737,7 +879,7 @@
                 if (synth.speaking && !isPaused) {
                     synth.pause();
                     isPaused = true;
-                    pauseBtn.textContent = 'Paused';
+                    togglePlayPauseButtons();
                     clearInterval(wordTimingInterval);
                 }
             }
@@ -747,7 +889,7 @@
                 if (synth.speaking && isPaused) {
                     synth.resume();
                     isPaused = false;
-                    pauseBtn.textContent = 'Pause';
+                    togglePlayPauseButtons();
                     
                     // Restart timing for Android
                     if (isAndroid) {
@@ -763,7 +905,7 @@
                     speakBtn.textContent = 'Speak';
                     highlightWord(-1);
                     isPaused = false;
-                    pauseBtn.textContent = 'Pause';
+                    togglePlayPauseButtons();
                     clearInterval(wordTimingInterval);
                 }
             }
@@ -784,6 +926,14 @@
                 utterance = new SpeechSynthesisUtterance(textToSpeak);
                 utterance.rate = parseFloat(speedSlider.value);
                 utterance.volume = parseFloat(volumeSlider.value);
+                
+                // Set selected voice if available
+                if (voiceSelect.value) {
+                    const selectedVoice = voices.find(voice => voice.name === voiceSelect.value);
+                    if (selectedVoice) {
+                        utterance.voice = selectedVoice;
+                    }
+                }
                 
                 // Track words
                 utterance.onboundary = function(event) {
@@ -806,6 +956,7 @@
                     currentWordIndex = -1;
                     speakBtn.textContent = 'Speak';
                     isPaused = false;
+                    togglePlayPauseButtons();
                     clearInterval(wordTimingInterval);
                 };
                 
@@ -817,6 +968,7 @@
                 synth.speak(utterance);
                 speakBtn.textContent = 'Speaking...';
                 isPaused = false;
+                togglePlayPauseButtons();
             }
             
             // Jump by number of words
@@ -851,11 +1003,23 @@
             
             wordSlider.addEventListener('input', () => {
                 const wordIndex = parseInt(wordSlider.value);
+                wordSliderFull.value = wordIndex;
                 wordPosition.textContent = `Word ${wordIndex + 1} of ${words.length}`;
             });
             
             wordSlider.addEventListener('change', () => {
                 const wordIndex = parseInt(wordSlider.value);
+                jumpToWord(wordIndex);
+            });
+            
+            wordSliderFull.addEventListener('input', () => {
+                const wordIndex = parseInt(wordSliderFull.value);
+                wordSlider.value = wordIndex;
+                wordPosition.textContent = `Word ${wordIndex + 1} of ${words.length}`;
+            });
+            
+            wordSliderFull.addEventListener('change', () => {
+                const wordIndex = parseInt(wordSliderFull.value);
                 jumpToWord(wordIndex);
             });
             
@@ -867,7 +1031,11 @@
             words = sampleText.split(' ');
             updatePhoneticsDisplay();
             wordSlider.max = words.length - 1;
+            wordSliderFull.max = words.length - 1;
             wordPosition.textContent = `Word 0 of ${words.length}`;
+            
+            // Initialize button states
+            togglePlayPauseButtons();
         });
     </script>
 </body>
