@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phonetics Reader with IPA</title>
+    <title>Phonetics Reader</title>
     <style>
         * {
             box-sizing: border-box;
@@ -29,6 +29,7 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             overflow: hidden;
+            flex-direction: row-reverse;
         }
         
         .content-area {
@@ -40,7 +41,7 @@
             flex: 3;
             background-color: #f9f9f9;
             padding: 25px;
-            border-left: 1px solid #eee;
+            border-right: 1px solid #eee;
             display: flex;
             flex-direction: column;
         }
@@ -54,6 +55,7 @@
         
         .input-section {
             margin-bottom: 25px;
+            position: relative;
         }
         
         textarea {
@@ -70,6 +72,27 @@
         textarea:focus {
             outline: none;
             border-color: #6e8efb;
+        }
+        
+        .text-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .text-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 20px;
+            background-color: #6e8efb;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .text-btn:hover {
+            background-color: #5a7de0;
         }
         
         .buttons {
@@ -280,8 +303,9 @@
             }
             
             .sidebar {
-                border-left: none;
-                border-top: 1px solid #eee;
+                border-right: none;
+                border-bottom: 1px solid #eee;
+                order: -1;
             }
         }
         
@@ -313,6 +337,11 @@
             
             <div class="input-section">
                 <textarea id="inputText" placeholder="Enter a sentence to see its phonetics and hear it spoken aloud...">The quick brown fox jumps over the lazy dog. This sentence contains all letters of the English alphabet.</textarea>
+                
+                <div class="text-controls">
+                    <button class="text-btn" id="clearBtn">Clear Text</button>
+                    <button class="text-btn" id="pasteBtn">Paste from Clipboard</button>
+                </div>
                 
                 <div class="buttons">
                     <button id="speakBtn">Speak</button>
@@ -409,6 +438,8 @@
             const phoneticsOutput = document.getElementById('phoneticsOutput');
             const ipaBtn = document.getElementById('ipaBtn');
             const englishBtn = document.getElementById('englishBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const pasteBtn = document.getElementById('pasteBtn');
             
             // Speech synthesis setup
             const synth = window.speechSynthesis;
@@ -418,6 +449,13 @@
             let isPaused = false;
             let wordStartTimes = [];
             let showIPA = true;
+            
+            // Check for URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const textParam = urlParams.get('text');
+            if (textParam) {
+                inputText.value = decodeURIComponent(textParam);
+            }
             
             // Update slider values display
             speedSlider.addEventListener('input', () => {
@@ -451,6 +489,24 @@
                 englishBtn.classList.add('active');
                 ipaBtn.classList.remove('active');
                 updatePhoneticsDisplay();
+            });
+            
+            // Clear text button
+            clearBtn.addEventListener('click', () => {
+                inputText.value = '';
+                inputText.focus();
+            });
+            
+            // Paste from clipboard button
+            pasteBtn.addEventListener('click', async () => {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    inputText.value = text;
+                    updatePhoneticsDisplay();
+                } catch (err) {
+                    alert('Failed to read from clipboard. Please paste manually.');
+                    console.error('Failed to read from clipboard:', err);
+                }
             });
             
             // Generate simple phonetics (for demonstration)
@@ -501,7 +557,11 @@
             // Update phonetics display based on current mode
             function updatePhoneticsDisplay() {
                 const text = inputText.value.trim();
-                if (text === '') return;
+                if (text === '') {
+                    phoneticsOutput.innerHTML = '';
+                    wordCount.textContent = 'Total words: 0';
+                    return;
+                }
                 
                 const phonetics = generatePhonetics(text, showIPA);
                 words = text.split(' ');
@@ -730,6 +790,9 @@
                 const wordIndex = parseInt(wordSlider.value);
                 jumpToWord(wordIndex);
             });
+            
+            // Update phonetics when text changes
+            inputText.addEventListener('input', updatePhoneticsDisplay);
             
             // Initialize with example text
             const sampleText = inputText.value;
