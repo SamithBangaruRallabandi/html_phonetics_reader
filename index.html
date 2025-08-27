@@ -16,7 +16,7 @@
             background: linear-gradient(135deg, #6e8efb, #a777e3);
             min-height: 100vh;
             padding: 20px;
-            padding-top: 100px;
+            padding-top: 140px;
         }
         
         .sticky-header {
@@ -95,6 +95,8 @@
         
         .content-area {
             padding: 20px;
+            display: flex;
+            flex-direction: column;
         }
         
         .sidebar {
@@ -103,6 +105,7 @@
             border-top: 1px solid #eee;
             display: flex;
             flex-direction: column;
+            order: -1; /* Move phonetics output above input on mobile */
         }
         
         h1 {
@@ -186,7 +189,7 @@
         
         #toggleSpeakBtn {
             background-color: #4CAF50;
-            min-width: 100px;
+            min-width: 80px;
         }
         
         #toggleSpeakBtn.speaking {
@@ -199,6 +202,22 @@
         
         #toggleSpeakBtn.speaking:hover {
             background-color: #d32f2f;
+        }
+        
+        #pauseBtn {
+            background-color: #ff9800;
+        }
+        
+        #pauseBtn:hover {
+            background-color: #f57c00;
+        }
+        
+        #pauseBtn.paused {
+            background-color: #2196F3;
+        }
+        
+        #pauseBtn.paused:hover {
+            background-color: #0b7dda;
         }
         
         .controls {
@@ -276,7 +295,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-top: 10px;
+            margin-bottom: 15px;
         }
         
         .output-header {
@@ -317,11 +336,12 @@
             font-size: 16px;
             line-height: 1.6;
             color: #333;
-            min-height: 150px;
+            height: 200px; /* Fixed height */
             padding: 12px;
             background: white;
             border-radius: 8px;
             box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+            overflow-y: auto; /* Vertical scrollbar */
         }
         
         .highlight {
@@ -387,6 +407,7 @@
             .content-area {
                 flex: 7;
                 padding: 30px;
+                order: 0;
             }
             
             .sidebar {
@@ -394,6 +415,7 @@
                 border-top: none;
                 border-right: 1px solid #eee;
                 padding: 25px;
+                order: 0;
             }
             
             .sticky-header {
@@ -419,6 +441,10 @@
                 padding: 8px 5px;
                 font-size: 14px;
             }
+            
+            #phoneticsOutput {
+                height: 250px; /* Slightly taller on desktop */
+            }
         }
         
         @media (max-width: 380px) {
@@ -432,7 +458,12 @@
             }
             
             body {
-                padding-top: 140px;
+                padding-top: 160px;
+            }
+            
+            .control-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
             }
         }
     </style>
@@ -441,6 +472,7 @@
     <div class="sticky-header">
         <div class="control-buttons">
             <button id="toggleSpeakBtn">Speak</button>
+            <button id="pauseBtn">Pause</button>
         </div>
         
         <div class="control-group">
@@ -476,6 +508,7 @@
             <div id="phoneticsOutput"></div>
             <div class="word-count" id="wordCount">Total words: 0</div>
         </div>
+        
         <div class="content-area">
             <h1>Phonetics Reader</h1>
             
@@ -511,6 +544,14 @@
                 </div>
                 
                 <div class="control-section">
+                    <div class="word-nav-container">
+                        <div class="section-label">
+                            <span>Word Navigation</span>
+                            <span class="value" id="wordPosition">0/0</span>
+                        </div>
+                        <input type="range" id="wordSliderFull" class="word-slider" min="0" value="0" step="1" style="flex-grow: 1;">
+                    </div>
+                    
                     <div class="section-label">
                         <span>Jump by Words</span>
                     </div>
@@ -537,14 +578,6 @@
                         <button class="jump-btn" data-words="10">+10</button>
                     </div>
                 </div>
-                
-                <div class="control-section word-nav-container">
-                    <div class="section-label">
-                        <span>Word Navigation</span>
-                    </div>
-                    <input type="range" id="wordSliderFull" class="word-slider" min="0" value="0" step="1" style="flex-grow: 1;">
-                    <span class="value" id="wordPosition">0/0</span>
-                </div>
             </div>
         </div>
     </div>
@@ -554,6 +587,7 @@
             // DOM Elements
             const inputText = document.getElementById('inputText');
             const toggleSpeakBtn = document.getElementById('toggleSpeakBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
             const speedInput = document.getElementById('speedInput');
             const speedUp = document.getElementById('speedUp');
             const speedDown = document.getElementById('speedDown');
@@ -587,6 +621,7 @@
             let words = [];
             let currentWordIndex = -1;
             let isSpeaking = false;
+            let isPaused = false;
             let showIPA = false; // English by default
             let wordTimingInterval = null;
             let voices = [];
@@ -739,15 +774,51 @@
                 }
             });
             
-            // Update toggle button appearance
-            function updateToggleButton() {
+            // Pause/resume functionality
+            pauseBtn.addEventListener('click', () => {
+                if (isSpeaking) {
+                    if (isPaused) {
+                        // Resume speaking
+                        if (isAndroid) {
+                            // For Android, we need to restart the word-by-word process
+                            speakWordByWord();
+                        } else {
+                            synth.resume();
+                        }
+                        isPaused = false;
+                        pauseBtn.textContent = 'Pause';
+                        pauseBtn.classList.remove('paused');
+                    } else {
+                        // Pause speaking
+                        if (isAndroid) {
+                            clearTimeout(wordTimingInterval);
+                        } else {
+                            synth.pause();
+                        }
+                        isPaused = true;
+                        pauseBtn.textContent = 'Resume';
+                        pauseBtn.classList.add('paused');
+                    }
+                }
+            });
+            
+            // Update button appearances
+            function updateButtonStates() {
                 if (isSpeaking) {
                     toggleSpeakBtn.textContent = 'Stop';
                     toggleSpeakBtn.classList.add('speaking');
+                    pauseBtn.style.display = 'inline-block';
                 } else {
                     toggleSpeakBtn.textContent = 'Speak';
                     toggleSpeakBtn.classList.remove('speaking');
+                    pauseBtn.style.display = 'inline-block';
+                    pauseBtn.textContent = 'Pause';
+                    pauseBtn.classList.remove('paused');
+                    isPaused = false;
                 }
+                
+                // Disable pause button if not speaking
+                pauseBtn.disabled = !isSpeaking;
             }
             
             // Generate simple phonetics (for demonstration)
@@ -858,9 +929,11 @@
             
             // Speak text word by word (for Android Chrome)
             function speakWordByWord() {
-                if (currentWordIndex >= words.length - 1) {
-                    // Reached the end
-                    stopSpeaking();
+                if (currentWordIndex >= words.length - 1 || isPaused) {
+                    // Reached the end or paused
+                    if (currentWordIndex >= words.length - 1) {
+                        stopSpeaking();
+                    }
                     return;
                 }
                 
@@ -883,12 +956,16 @@
                 
                 utterance.onend = function() {
                     // Speak next word after a short delay
-                    setTimeout(speakWordByWord, 200);
+                    if (!isPaused) {
+                        wordTimingInterval = setTimeout(speakWordByWord, 200);
+                    }
                 };
                 
                 utterance.onerror = function() {
                     // Continue with next word even if there's an error
-                    setTimeout(speakWordByWord, 200);
+                    if (!isPaused) {
+                        wordTimingInterval = setTimeout(speakWordByWord, 200);
+                    }
                 };
                 
                 synth.speak(utterance);
@@ -914,7 +991,8 @@
                 // For Android Chrome, speak word by word
                 if (isAndroid) {
                     isSpeaking = true;
-                    updateToggleButton();
+                    isPaused = false;
+                    updateButtonStates();
                     speakWordByWord();
                 } else {
                     // For other browsers, use the standard approach
@@ -932,7 +1010,7 @@
                     
                     // Track words as they're spoken (if supported)
                     utterance.onboundary = function(event) {
-                        if (event.name === 'word') {
+                        if (event.name === 'word' && !isPaused) {
                             const charIndex = event.charIndex;
                             let currentIndex = 0;
                             
@@ -950,18 +1028,21 @@
                     utterance.onend = function() {
                         currentWordIndex = -1;
                         isSpeaking = false;
-                        updateToggleButton();
+                        isPaused = false;
+                        updateButtonStates();
                         wordPosition.textContent = `0/${words.length}`;
                     };
                     
                     utterance.onerror = function() {
                         isSpeaking = false;
-                        updateToggleButton();
+                        isPaused = false;
+                        updateButtonStates();
                     };
                     
                     synth.speak(utterance);
                     isSpeaking = true;
-                    updateToggleButton();
+                    isPaused = false;
+                    updateButtonStates();
                 }
             }
             
@@ -970,8 +1051,10 @@
                 if (synth.speaking) {
                     synth.cancel();
                 }
+                clearTimeout(wordTimingInterval);
                 isSpeaking = false;
-                updateToggleButton();
+                isPaused = false;
+                updateButtonStates();
                 
                 // Reset to beginning if we were at the end
                 if (currentWordIndex >= words.length - 1) {
@@ -991,7 +1074,7 @@
                 stopSpeaking();
                 
                 // Update current position
-                currentWordIndex = wordIndex - 1; // Will be incremented when speaking starts
+                currentWordIndex = wordIndex;
                 highlightWord(wordIndex);
             }
             
@@ -1040,7 +1123,7 @@
             updatePhoneticsDisplay();
             
             // Initialize button states
-            updateToggleButton();
+            updateButtonStates();
         });
     </script>
 </body>
