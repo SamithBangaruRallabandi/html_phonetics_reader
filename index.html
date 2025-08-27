@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phonetics Reader</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .input-section {
+            margin-bottom: 25px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #6e8efb;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 50px;
+            background-color: #6e8efb;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background-color: #5a7de0;
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        #speakBtn {
+            background-color: #4CAF50;
+        }
+        
+        #speakBtn:hover {
+            background-color: #3e8e41;
+        }
+        
+        #pauseBtn {
+            background-color: #ff9800;
+        }
+        
+        #pauseBtn:hover {
+            background-color: #f57c00;
+        }
+        
+        #stopBtn {
+            background-color: #f44336;
+        }
+        
+        #stopBtn:hover {
+            background-color: #d32f2f;
+        }
+        
+        .controls {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .value {
+            color: #6e8efb;
+            font-weight: 600;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ddd;
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #6e8efb;
+            cursor: pointer;
+        }
+        
+        .jump-controls {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .jump-btn {
+            flex: 1;
+            min-width: 60px;
+            text-align: center;
+            padding: 8px 5px;
+            background-color: #5a7de0;
+            font-size: 14px;
+        }
+        
+        .negative {
+            background-color: #ff9800;
+        }
+        
+        .negative:hover {
+            background-color: #f57c00;
+        }
+        
+        .word-slider-container {
+            margin-top: 15px;
+        }
+        
+        .word-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .output {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            min-height: 100px;
+        }
+        
+        .output h3 {
+            color: #555;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        #phoneticsOutput {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #333;
+            min-height: 60px;
+        }
+        
+        .highlight {
+            padding: 2px 4px;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+        
+        .current {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            padding: 2px 6px;
+        }
+        
+        .word-count {
+            text-align: center;
+            margin-top: 10px;
+            color: #777;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .jump-controls {
+                flex-direction: column;
+            }
+            
+            button {
+                padding: 12px;
+            }
+            
+            .jump-btn {
+                min-width: 50px;
+                font-size: 12px;
+                padding: 6px 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Phonetics Reader</h1>
+        
+        <div class="input-section">
+            <textarea id="inputText" placeholder="Enter a sentence to see its phonetics and hear it spoken aloud...">The quick brown fox jumps over the lazy dog. This sentence contains all letters of the English alphabet.</textarea>
+            
+            <div class="buttons">
+                <button id="speakBtn">Speak</button>
+                <button id="pauseBtn">Pause</button>
+                <button id="resumeBtn">Resume</button>
+                <button id="stopBtn">Stop</button>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Speed</span>
+                    <span class="value" id="speedValue">1.0</span>
+                </div>
+                <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
+            </div>
+            
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Volume</span>
+                    <span class="value" id="volumeValue">1.0</span>
+                </div>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
+            </div>
+            
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Jump by Words</span>
+                </div>
+                <div class="jump-controls">
+                    <button class="jump-btn negative" data-words="-10">-10</button>
+                    <button class="jump-btn negative" data-words="-9">-9</button>
+                    <button class="jump-btn negative" data-words="-8">-8</button>
+                    <button class="jump-btn negative" data-words="-7">-7</button>
+                    <button class="jump-btn negative" data-words="-6">-6</button>
+                    <button class="jump-btn negative" data-words="-5">-5</button>
+                    <button class="jump-btn negative" data-words="-4">-4</button>
+                    <button class="jump-btn negative" data-words="-3">-3</button>
+                    <button class="jump-btn negative" data-words="-2">-2</button>
+                    <button class="jump-btn negative" data-words="-1">-1</button>
+                    <button class="jump-btn" data-words="1">+1</button>
+                    <button class="jump-btn" data-words="2">+2</button>
+                    <button class="jump-btn" data-words="3">+3</button>
+                    <button class="jump-btn" data-words="4">+4</button>
+                    <button class="jump-btn" data-words="5">+5</button>
+                    <button class="jump-btn" data-words="6">+6</button>
+                    <button class="jump-btn" data-words="7">+7</button>
+                    <button class="jump-btn" data-words="8">+8</button>
+                    <button class="jump-btn" data-words="9">+9</button>
+                    <button class="jump-btn" data-words="10">+10</button>
+                </div>
+            </div>
+            
+            <div class="control-group word-slider-container">
+                <div class="control-label">
+                    <span>Word Navigation</span>
+                    <span class="value" id="wordPosition">Word 0 of 0</span>
+                </div>
+                <input type="range" id="wordSlider" class="word-slider" min="0" value="0" step="1">
+            </div>
+        </div>
+        
+        <div class="output">
+            <h3>Phonetics Output</h3>
+            <div id="phoneticsOutput"></div>
+            <div class="word-count" id="wordCount">Total words: 0</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const inputText = document.getElementById('inputText');
+            const speakBtn = document.getElementById('speakBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const resumeBtn = document.getElementById('resumeBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const speedSlider = document.getElementById('speedSlider');
+            const speedValue = document.getElementById('speedValue');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumeValue = document.getElementById('volumeValue');
+            const jumpButtons = document.querySelectorAll('.jump-btn');
+            const wordSlider = document.getElementById('wordSlider');
+            const wordPosition = document.getElementById('wordPosition');
+            const wordCount = document.getElementById('wordCount');
+            const phoneticsOutput = document.getElementById('phoneticsOutput');
+            
+            // Speech synthesis setup
+            const synth = window.speechSynthesis;
+            let utterance = null;
+            let words = [];
+            let currentWordIndex = -1;
+            let isPaused = false;
+            let wordStartTimes = [];
+            
+            // Update slider values display
+            speedSlider.addEventListener('input', () => {
+                speedValue.textContent = speedSlider.value;
+                if (utterance && synth.speaking) {
+                    utterance.rate = parseFloat(speedSlider.value);
+                    if (!isPaused) {
+                        synth.cancel();
+                        synth.speak(utterance);
+                    }
+                }
+            });
+            
+            volumeSlider.addEventListener('input', () => {
+                volumeValue.textContent = volumeSlider.value;
+                if (utterance) {
+                    utterance.volume = parseFloat(volumeSlider.value);
+                }
+            });
+            
+            // Generate simple phonetics (for demonstration)
+            function generatePhonetics(text) {
+                // This is a simplified demonstration - real phonetics would require a library
+                const words = text.split(' ');
+                return words.map(word => {
+                    // Simple transformation for demonstration
+                    if (word.length <= 2) return word;
+                    
+                    // Add phonetic-like formatting
+                    if (word.endsWith('.')) {
+                        return word.substring(0, 2) + '-' + word.substring(2, word.length-1) + '(.)';
+                    }
+                    return word.substring(0, 2) + '-' + word.substring(2);
+                }).join(' ');
+            }
+            
+            // Highlight the current word being spoken
+            function highlightWord(index) {
+                // Remove previous highlights
+                const highlighted = document.querySelectorAll('.highlight');
+                highlighted.forEach(el => {
+                    el.classList.remove('highlight');
+                    el.classList.remove('current');
+                });
+                
+                // Highlight current word
+                if (index >= 0 && index < words.length) {
+                    const wordElement = document.getElementById(`word-${index}`);
+                    if (wordElement) {
+                        wordElement.classList.add('highlight');
+                        wordElement.classList.add('current');
+                        wordElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        
+                        // Update word slider position
+                        wordSlider.value = index;
+                        wordPosition.textContent = `Word ${index + 1} of ${words.length}`;
+                    }
+                }
+            }
+            
+            // Estimate word start times (simplified)
+            function estimateWordStartTimes(text, rate) {
+                const words = text.split(' ');
+                const wordTimes = [0]; // First word starts at 0
+                const wordDuration = 0.5 / rate; // Base duration per word adjusted by rate
+                
+                for (let i = 1; i < words.length; i++) {
+                    // Longer words take more time, punctuation adds pause
+                    const prevWord = words[i-1];
+                    let additionalPause = 0;
+                    
+                    if (prevWord.endsWith('.') || prevWord.endsWith('!') || prevWord.endsWith('?')) {
+                        additionalPause = 0.3;
+                    } else if (prevWord.endsWith(',') || prevWord.endsWith(';') || prevWord.endsWith(':')) {
+                        additionalPause = 0.2;
+                    }
+                    
+                    wordTimes.push(wordTimes[i-1] + wordDuration + additionalPause + (words[i-1].length * 0.03));
+                }
+                
+                return wordTimes;
+            }
+            
+            // Speak the text
+            function speakText() {
+                if (synth.speaking && !isPaused) {
+                    synth.cancel();
+                }
+                
+                const text = inputText.value.trim();
+                if (text === '') return;
+                
+                // Generate and display phonetics
+                const phonetics = generatePhonetics(text);
+                words = text.split(' ');
+                
+                phoneticsOutput.innerHTML = words.map((word, index) => {
+                    return `<span id="word-${index}">${word}</span>`;
+                }).join(' ');
+                
+                wordCount.textContent = `Total words: ${words.length}`;
+                
+                // Set up word slider
+                wordSlider.max = words.length - 1;
+                wordSlider.value = 0;
+                
+                // Create utterance
+                utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = parseFloat(speedSlider.value);
+                utterance.volume = parseFloat(volumeSlider.value);
+                
+                // Estimate word start times
+                wordStartTimes = estimateWordStartTimes(text, utterance.rate);
+                
+                // Track words as they're spoken
+                utterance.onboundary = function(event) {
+                    if (event.name === 'word') {
+                        const charIndex = event.charIndex;
+                        let currentIndex = 0;
+                        
+                        for (let i = 0; i < words.length; i++) {
+                            currentIndex += words[i].length + 1; // +1 for space
+                            if (charIndex < currentIndex) {
+                                currentWordIndex = i;
+                                highlightWord(i);
+                                break;
+                            }
+                        }
+                    }
+                };
+                
+                utterance.onend = function() {
+                    currentWordIndex = -1;
+                    speakBtn.textContent = 'Speak';
+                    isPaused = false;
+                };
+                
+                synth.speak(utterance);
+                speakBtn.textContent = 'Speaking...';
+                isPaused = false;
+            }
+            
+            // Pause speaking
+            function pauseSpeaking() {
+                if (synth.speaking && !isPaused) {
+                    synth.pause();
+                    isPaused = true;
+                    pauseBtn.textContent = 'Paused';
+                }
+            }
+            
+            // Resume speaking
+            function resumeSpeaking() {
+                if (synth.speaking && isPaused) {
+                    synth.resume();
+                    isPaused = false;
+                    pauseBtn.textContent = 'Pause';
+                }
+            }
+            
+            // Stop speaking
+            function stopSpeaking() {
+                if (synth.speaking) {
+                    synth.cancel();
+                    speakBtn.textContent = 'Speak';
+                    highlightWord(-1);
+                    isPaused = false;
+                    pauseBtn.textContent = 'Pause';
+                }
+            }
+            
+            // Jump to specific word
+            function jumpToWord(wordIndex) {
+                if (!utterance || words.length === 0) return;
+                
+                // Ensure wordIndex is within bounds
+                wordIndex = Math.max(0, Math.min(wordIndex, words.length - 1));
+                
+                // Stop current speech
+                synth.cancel();
+                
+                // Create new utterance starting from the desired word
+                const textToSpeak = words.slice(wordIndex).join(' ');
+                utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.rate = parseFloat(speedSlider.value);
+                utterance.volume = parseFloat(volumeSlider.value);
+                
+                // Track words
+                utterance.onboundary = function(event) {
+                    if (event.name === 'word') {
+                        const charIndex = event.charIndex;
+                        let currentIndex = 0;
+                        
+                        for (let i = wordIndex; i < words.length; i++) {
+                            currentIndex += words[i].length + 1;
+                            if (charIndex < currentIndex) {
+                                currentWordIndex = i;
+                                highlightWord(i);
+                                break;
+                            }
+                        }
+                    }
+                };
+                
+                utterance.onend = function() {
+                    currentWordIndex = -1;
+                    speakBtn.textContent = 'Speak';
+                    isPaused = false;
+                };
+                
+                synth.speak(utterance);
+                speakBtn.textContent = 'Speaking...';
+                isPaused = false;
+            }
+            
+            // Jump by number of words
+            function jumpByWords(wordCount) {
+                if (!utterance || words.length === 0) return;
+                
+                let newIndex = currentWordIndex + wordCount;
+                
+                // If we haven't started speaking yet, adjust accordingly
+                if (currentWordIndex === -1 && wordCount > 0) {
+                    newIndex = wordCount - 1;
+                }
+                
+                // Ensure the new index is within bounds
+                newIndex = Math.max(0, Math.min(newIndex, words.length - 1));
+                
+                jumpToWord(newIndex);
+            }
+            
+            // Event listeners
+            speakBtn.addEventListener('click', speakText);
+            pauseBtn.addEventListener('click', pauseSpeaking);
+            resumeBtn.addEventListener('click', resumeSpeaking);
+            stopBtn.addEventListener('click', stopSpeaking);
+            
+            jumpButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const words = parseInt(button.getAttribute('data-words'));
+                    jumpByWords(words);
+                });
+            });
+            
+            wordSlider.addEventListener('input', () => {
+                const wordIndex = parseInt(wordSlider.value);
+                wordPosition.textContent = `Word ${wordIndex + 1} of ${words.length}`;
+            });
+            
+            wordSlider.addEventListener('change', () => {
+                const wordIndex = parseInt(wordSlider.value);
+                jumpToWord(wordIndex);
+            });
+            
+            // Initialize with example phonetics
+            const sampleText = inputText.value;
+            words = sampleText.split(' ');
+            phoneticsOutput.innerHTML = words.map((word, index) => {
+                return `<span id="word-${index}">${word}</span>`;
+            }).join(' ');
+            wordCount.textContent = `Total words: ${words.length}`;
+            wordSlider.max = words.length - 1;
+            wordPosition.textContent = `Word 0 of ${words.length}`;
+        });
+    </script>
+</body>
+</html>
