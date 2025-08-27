@@ -16,7 +16,7 @@
             background: linear-gradient(135deg, #6e8efb, #a777e3);
             min-height: 100vh;
             padding: 20px;
-            padding-top: 130px;
+            padding-top: 100px;
         }
         
         .sticky-header {
@@ -25,30 +25,40 @@
             left: 0;
             right: 0;
             background: white;
-            padding: 15px 20px;
+            padding: 12px 15px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             z-index: 1000;
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 10px;
             align-items: center;
+            justify-content: center;
         }
         
         .control-buttons {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
         
         .control-group {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         
         .control-label {
             font-size: 14px;
             color: #555;
             white-space: nowrap;
+        }
+        
+        .number-input {
+            width: 60px;
+            padding: 6px 8px;
+            border-radius: 20px;
+            border: 2px solid #ddd;
+            text-align: center;
+            font-size: 14px;
         }
         
         .main-container {
@@ -60,19 +70,17 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             overflow: hidden;
-            flex-direction: row-reverse;
+            flex-direction: column;
         }
         
         .content-area {
-            flex: 7;
-            padding: 30px;
+            padding: 20px;
         }
         
         .sidebar {
-            flex: 3;
             background-color: #f9f9f9;
-            padding: 25px;
-            border-right: 1px solid #eee;
+            padding: 20px;
+            border-top: 1px solid #eee;
             display: flex;
             flex-direction: column;
         }
@@ -80,19 +88,20 @@
         h1 {
             color: #333;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-weight: 600;
+            font-size: 24px;
         }
         
         .input-section {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             position: relative;
         }
         
         textarea {
             width: 100%;
-            height: 120px;
-            padding: 15px;
+            height: 100px;
+            padding: 12px;
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
@@ -107,17 +116,17 @@
         
         .text-controls {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 8px;
+            margin-top: 8px;
         }
         
         .text-btn {
-            padding: 6px 12px;
+            padding: 6px 10px;
             border: none;
             border-radius: 20px;
             background-color: #6e8efb;
             color: white;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.3s;
         }
@@ -129,13 +138,13 @@
         .buttons {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             margin-top: 15px;
             flex-wrap: wrap;
         }
         
         button {
-            padding: 10px 20px;
+            padding: 8px 16px;
             border: none;
             border-radius: 50px;
             background-color: #6e8efb;
@@ -143,6 +152,7 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s;
+            font-size: 14px;
         }
         
         button:hover {
@@ -180,13 +190,13 @@
         
         .controls {
             background-color: #f9f9f9;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         
         .control-section {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .control-section:last-child {
@@ -228,15 +238,15 @@
         
         .jump-controls {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
         }
         
         .jump-btn {
             text-align: center;
-            padding: 8px 5px;
+            padding: 6px 4px;
             background-color: #5a7de0;
-            font-size: 14px;
+            font-size: 12px;
             border-radius: 5px;
             min-width: 0;
         }
@@ -249,40 +259,39 @@
             background-color: #f57c00;
         }
         
-        .word-slider-container {
-            margin-top: 15px;
-        }
-        
-        .word-slider {
-            width: 100%;
-            margin: 10px 0;
+        .word-nav-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
         }
         
         .output-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         
         .output-header h3 {
             color: #555;
             margin: 0;
+            font-size: 18px;
         }
         
         .toggle-buttons {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
         
         .toggle-btn {
-            padding: 6px 12px;
+            padding: 5px 10px;
             background-color: #e0e0e0;
             color: #555;
             border: none;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             transition: all 0.3s;
         }
         
@@ -292,11 +301,11 @@
         }
         
         #phoneticsOutput {
-            font-size: 18px;
+            font-size: 16px;
             line-height: 1.6;
             color: #333;
-            min-height: 200px;
-            padding: 15px;
+            min-height: 150px;
+            padding: 12px;
             background: white;
             border-radius: 8px;
             box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
@@ -317,31 +326,32 @@
         
         .word-count {
             text-align: center;
-            margin-top: 10px;
+            margin-top: 8px;
             color: #777;
-            font-size: 14px;
+            font-size: 13px;
         }
         
         .ipa {
             font-family: 'Times New Roman', serif;
-            font-size: 20px;
+            font-size: 18px;
         }
         
         .android-warning {
             display: none;
             background-color: #ffecb3;
-            padding: 10px;
+            padding: 8px;
             border-radius: 5px;
-            margin-top: 10px;
-            font-size: 14px;
+            margin-top: 8px;
+            font-size: 12px;
             color: #7d6608;
             text-align: center;
         }
         
         .voice-selector {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
         }
         
         select {
@@ -349,64 +359,67 @@
             border-radius: 20px;
             border: 2px solid #ddd;
             background: white;
+            font-size: 14px;
         }
         
-        @media (max-width: 900px) {
+        @media (min-width: 768px) {
+            body {
+                padding-top: 130px;
+            }
+            
             .main-container {
-                flex-direction: column;
+                flex-direction: row-reverse;
+            }
+            
+            .content-area {
+                flex: 7;
+                padding: 30px;
             }
             
             .sidebar {
-                border-right: none;
-                border-bottom: 1px solid #eee;
-                order: -1;
+                flex: 3;
+                border-top: none;
+                border-right: 1px solid #eee;
+                padding: 25px;
             }
             
             .sticky-header {
-                padding: 10px 15px;
-                flex-direction: column;
-                align-items: stretch;
+                padding: 15px 20px;
+                justify-content: space-between;
             }
             
-            body {
-                padding-top: 180px;
+            h1 {
+                font-size: 28px;
+                margin-bottom: 20px;
             }
-        }
-        
-        @media (max-width: 600px) {
-            .content-area, .sidebar {
-                padding: 20px;
+            
+            textarea {
+                height: 120px;
             }
             
             .jump-controls {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            
-            button {
-                padding: 8px 16px;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
             }
             
             .jump-btn {
-                font-size: 12px;
-                padding: 6px 3px;
+                padding: 8px 5px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 380px) {
+            .jump-controls {
+                grid-template-columns: repeat(3, 1fr);
             }
             
             .sticky-header {
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                padding: 8px 12px;
-            }
-            
-            .control-buttons {
-                flex-wrap: nowrap;
-            }
-            
-            .control-group {
-                flex-shrink: 0;
+                flex-direction: column;
+                gap: 8px;
             }
             
             body {
-                padding-top: 120px;
+                padding-top: 140px;
             }
         }
     </style>
@@ -422,20 +435,14 @@
         
         <div class="control-group">
             <span class="control-label">Speed:</span>
-            <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1" style="width: 100px;">
-            <span class="value" id="speedValue">1.0</span>
+            <input type="number" id="speedInput" min="0.5" max="2" step="0.1" value="1" class="number-input">
         </div>
         
         <div class="control-group">
-            <span class="control-label">Word Nav:</span>
-            <input type="range" id="wordSlider" min="0" value="0" step="1" style="width: 100px;">
-        </div>
-        
-        <div class="control-group voice-selector">
-            <span class="control-label">Voice:</span>
-            <select id="voiceSelect">
-                <option value="">Default</option>
-            </select>
+            <span class="control-label">Word:</span>
+            <input type="number" id="wordInput" min="0" value="0" step="1" class="number-input">
+            <span class="control-label">of</span>
+            <span id="totalWords">0</span>
         </div>
     </div>
     
@@ -463,6 +470,15 @@
                         <span class="value" id="volumeValue">1.0</span>
                     </div>
                     <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
+                </div>
+                
+                <div class="control-section voice-selector">
+                    <div class="section-label">
+                        <span>Voice</span>
+                    </div>
+                    <select id="voiceSelect">
+                        <option value="">Default</option>
+                    </select>
                 </div>
                 
                 <div class="control-section">
@@ -493,12 +509,12 @@
                     </div>
                 </div>
                 
-                <div class="control-section word-slider-container">
+                <div class="control-section word-nav-container">
                     <div class="section-label">
                         <span>Word Navigation</span>
-                        <span class="value" id="wordPosition">Word 0 of 0</span>
                     </div>
-                    <input type="range" id="wordSliderFull" class="word-slider" min="0" value="0" step="1">
+                    <input type="range" id="wordSliderFull" class="word-slider" min="0" value="0" step="1" style="flex-grow: 1;">
+                    <span class="value" id="wordPosition">0/0</span>
                 </div>
             </div>
         </div>
@@ -524,15 +540,14 @@
             const pauseBtn = document.getElementById('pauseBtn');
             const resumeBtn = document.getElementById('resumeBtn');
             const stopBtn = document.getElementById('stopBtn');
-            const speedSlider = document.getElementById('speedSlider');
-            const speedSliderSticky = document.getElementById('speedSlider');
-            const speedValue = document.getElementById('speedValue');
+            const speedInput = document.getElementById('speedInput');
             const volumeSlider = document.getElementById('volumeSlider');
             const volumeValue = document.getElementById('volumeValue');
             const jumpButtons = document.querySelectorAll('.jump-btn');
-            const wordSlider = document.getElementById('wordSlider');
+            const wordInput = document.getElementById('wordInput');
             const wordSliderFull = document.getElementById('wordSliderFull');
             const wordPosition = document.getElementById('wordPosition');
+            const totalWords = document.getElementById('totalWords');
             const wordCount = document.getElementById('wordCount');
             const phoneticsOutput = document.getElementById('phoneticsOutput');
             const ipaBtn = document.getElementById('ipaBtn');
@@ -598,11 +613,15 @@
                 inputText.value = decodeURIComponent(textParam);
             }
             
-            // Update slider values display
-            speedSlider.addEventListener('input', () => {
-                speedValue.textContent = speedSlider.value;
+            // Update input values
+            speedInput.addEventListener('change', () => {
+                let speedValue = parseFloat(speedInput.value);
+                // Ensure value is within range
+                speedValue = Math.min(2, Math.max(0.5, speedValue));
+                speedInput.value = speedValue.toFixed(1);
+                
                 if (utterance) {
-                    utterance.rate = parseFloat(speedSlider.value);
+                    utterance.rate = speedValue;
                     // Restart speech to apply changes in real-time
                     if (synth.speaking && !isPaused) {
                         const wasPaused = isPaused;
@@ -620,6 +639,16 @@
                 if (utterance) {
                     utterance.volume = parseFloat(volumeSlider.value);
                 }
+            });
+            
+            // Word input handler
+            wordInput.addEventListener('change', () => {
+                let wordIndex = parseInt(wordInput.value);
+                // Ensure value is within range
+                wordIndex = Math.min(words.length - 1, Math.max(0, wordIndex));
+                wordInput.value = wordIndex;
+                
+                jumpToWord(wordIndex);
             });
             
             // Toggle between IPA and English
@@ -717,6 +746,7 @@
                 if (text === '') {
                     phoneticsOutput.innerHTML = '';
                     wordCount.textContent = 'Total words: 0';
+                    totalWords.textContent = '0';
                     return;
                 }
                 
@@ -729,12 +759,16 @@
                 }).join(' ');
                 
                 wordCount.textContent = `Total words: ${words.length}`;
+                totalWords.textContent = words.length;
                 
                 // Set up word slider
-                wordSlider.max = words.length - 1;
                 wordSliderFull.max = words.length - 1;
-                wordSlider.value = currentWordIndex >= 0 ? currentWordIndex : 0;
+                wordInput.max = words.length - 1;
+                wordInput.value = currentWordIndex >= 0 ? currentWordIndex : 0;
                 wordSliderFull.value = currentWordIndex >= 0 ? currentWordIndex : 0;
+                
+                // Update position display
+                wordPosition.textContent = `${currentWordIndex >= 0 ? currentWordIndex + 1 : 0}/${words.length}`;
                 
                 // Re-highlight current word if needed
                 if (currentWordIndex >= 0) {
@@ -759,10 +793,10 @@
                         wordElement.classList.add('current');
                         wordElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         
-                        // Update word slider position
-                        wordSlider.value = index;
+                        // Update word input position
+                        wordInput.value = index;
                         wordSliderFull.value = index;
-                        wordPosition.textContent = `Word ${index + 1} of ${words.length}`;
+                        wordPosition.textContent = `${index + 1}/${words.length}`;
                     }
                 }
             }
@@ -794,7 +828,7 @@
             function startWordTiming(text, rate) {
                 clearInterval(wordTimingInterval);
                 const wordTimes = estimateWordStartTimes(text, rate);
-                let currentIndex = 0;
+                let currentIndex = currentWordIndex >= 0 ? currentWordIndex : 0;
                 
                 wordTimingInterval = setInterval(() => {
                     if (currentIndex < wordTimes.length - 1) {
@@ -820,7 +854,7 @@
                 
                 // Create utterance
                 utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = parseFloat(speedSlider.value);
+                utterance.rate = parseFloat(speedInput.value);
                 utterance.volume = parseFloat(volumeSlider.value);
                 
                 // Set selected voice if available
@@ -857,6 +891,7 @@
                     isPaused = false;
                     togglePlayPauseButtons();
                     clearInterval(wordTimingInterval);
+                    wordPosition.textContent = `0/${words.length}`;
                 };
                 
                 utterance.onerror = function() {
@@ -907,6 +942,7 @@
                     isPaused = false;
                     togglePlayPauseButtons();
                     clearInterval(wordTimingInterval);
+                    wordPosition.textContent = `0/${words.length}`;
                 }
             }
             
@@ -924,7 +960,7 @@
                 // Create new utterance starting from the desired word
                 const textToSpeak = words.slice(wordIndex).join(' ');
                 utterance = new SpeechSynthesisUtterance(textToSpeak);
-                utterance.rate = parseFloat(speedSlider.value);
+                utterance.rate = parseFloat(speedInput.value);
                 utterance.volume = parseFloat(volumeSlider.value);
                 
                 // Set selected voice if available
@@ -958,6 +994,7 @@
                     isPaused = false;
                     togglePlayPauseButtons();
                     clearInterval(wordTimingInterval);
+                    wordPosition.textContent = `0/${words.length}`;
                 };
                 
                 // Start fallback timing for Android
@@ -1001,21 +1038,10 @@
                 });
             });
             
-            wordSlider.addEventListener('input', () => {
-                const wordIndex = parseInt(wordSlider.value);
-                wordSliderFull.value = wordIndex;
-                wordPosition.textContent = `Word ${wordIndex + 1} of ${words.length}`;
-            });
-            
-            wordSlider.addEventListener('change', () => {
-                const wordIndex = parseInt(wordSlider.value);
-                jumpToWord(wordIndex);
-            });
-            
             wordSliderFull.addEventListener('input', () => {
                 const wordIndex = parseInt(wordSliderFull.value);
-                wordSlider.value = wordIndex;
-                wordPosition.textContent = `Word ${wordIndex + 1} of ${words.length}`;
+                wordInput.value = wordIndex;
+                wordPosition.textContent = `${wordIndex + 1}/${words.length}`;
             });
             
             wordSliderFull.addEventListener('change', () => {
@@ -1030,9 +1056,6 @@
             const sampleText = inputText.value;
             words = sampleText.split(' ');
             updatePhoneticsDisplay();
-            wordSlider.max = words.length - 1;
-            wordSliderFull.max = words.length - 1;
-            wordPosition.textContent = `Word 0 of ${words.length}`;
             
             // Initialize button states
             togglePlayPauseButtons();
