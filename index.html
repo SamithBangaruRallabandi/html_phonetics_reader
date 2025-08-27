@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phonetics Reader</title>
+    <title>Phonetics Reader with IPA</title>
     <style>
         * {
             box-sizing: border-box;
@@ -21,13 +21,28 @@
             padding: 20px;
         }
         
-        .container {
+        .main-container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
             background-color: white;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            width: 100%;
-            max-width: 800px;
+            overflow: hidden;
+        }
+        
+        .content-area {
+            flex: 7;
             padding: 30px;
+        }
+        
+        .sidebar {
+            flex: 3;
+            background-color: #f9f9f9;
+            padding: 25px;
+            border-left: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
         }
         
         h1 {
@@ -43,7 +58,7 @@
         
         textarea {
             width: 100%;
-            height: 100px;
+            height: 120px;
             padding: 15px;
             border: 2px solid #ddd;
             border-radius: 8px;
@@ -190,25 +205,48 @@
             margin: 10px 0;
         }
         
-        .output {
-            margin-top: 25px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 10px;
-            min-height: 100px;
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
         
-        .output h3 {
+        .output-header h3 {
             color: #555;
-            margin-bottom: 15px;
-            text-align: center;
+            margin: 0;
+        }
+        
+        .toggle-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .toggle-btn {
+            padding: 6px 12px;
+            background-color: #e0e0e0;
+            color: #555;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .toggle-btn.active {
+            background-color: #6e8efb;
+            color: white;
         }
         
         #phoneticsOutput {
             font-size: 18px;
             line-height: 1.6;
             color: #333;
-            min-height: 60px;
+            min-height: 200px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
         }
         
         .highlight {
@@ -231,8 +269,24 @@
             font-size: 14px;
         }
         
+        .ipa {
+            font-family: 'Times New Roman', serif;
+            font-size: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                border-left: none;
+                border-top: 1px solid #eee;
+            }
+        }
+        
         @media (max-width: 600px) {
-            .container {
+            .content-area, .sidebar {
                 padding: 20px;
             }
             
@@ -253,76 +307,84 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Phonetics Reader</h1>
-        
-        <div class="input-section">
-            <textarea id="inputText" placeholder="Enter a sentence to see its phonetics and hear it spoken aloud...">The quick brown fox jumps over the lazy dog. This sentence contains all letters of the English alphabet.</textarea>
+    <div class="main-container">
+        <div class="content-area">
+            <h1>Phonetics Reader</h1>
             
-            <div class="buttons">
-                <button id="speakBtn">Speak</button>
-                <button id="pauseBtn">Pause</button>
-                <button id="resumeBtn">Resume</button>
-                <button id="stopBtn">Stop</button>
+            <div class="input-section">
+                <textarea id="inputText" placeholder="Enter a sentence to see its phonetics and hear it spoken aloud...">The quick brown fox jumps over the lazy dog. This sentence contains all letters of the English alphabet.</textarea>
+                
+                <div class="buttons">
+                    <button id="speakBtn">Speak</button>
+                    <button id="pauseBtn">Pause</button>
+                    <button id="resumeBtn">Resume</button>
+                    <button id="stopBtn">Stop</button>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Speed</span>
+                        <span class="value" id="speedValue">1.0</span>
+                    </div>
+                    <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Volume</span>
+                        <span class="value" id="volumeValue">1.0</span>
+                    </div>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Jump by Words</span>
+                    </div>
+                    <div class="jump-controls">
+                        <button class="jump-btn negative" data-words="-10">-10</button>
+                        <button class="jump-btn negative" data-words="-9">-9</button>
+                        <button class="jump-btn negative" data-words="-8">-8</button>
+                        <button class="jump-btn negative" data-words="-7">-7</button>
+                        <button class="jump-btn negative" data-words="-6">-6</button>
+                        <button class="jump-btn negative" data-words="-5">-5</button>
+                        <button class="jump-btn negative" data-words="-4">-4</button>
+                        <button class="jump-btn negative" data-words="-3">-3</button>
+                        <button class="jump-btn negative" data-words="-2">-2</button>
+                        <button class="jump-btn negative" data-words="-1">-1</button>
+                        <button class="jump-btn" data-words="1">+1</button>
+                        <button class="jump-btn" data-words="2">+2</button>
+                        <button class="jump-btn" data-words="3">+3</button>
+                        <button class="jump-btn" data-words="4">+4</button>
+                        <button class="jump-btn" data-words="5">+5</button>
+                        <button class="jump-btn" data-words="6">+6</button>
+                        <button class="jump-btn" data-words="7">+7</button>
+                        <button class="jump-btn" data-words="8">+8</button>
+                        <button class="jump-btn" data-words="9">+9</button>
+                        <button class="jump-btn" data-words="10">+10</button>
+                    </div>
+                </div>
+                
+                <div class="control-group word-slider-container">
+                    <div class="control-label">
+                        <span>Word Navigation</span>
+                        <span class="value" id="wordPosition">Word 0 of 0</span>
+                    </div>
+                    <input type="range" id="wordSlider" class="word-slider" min="0" value="0" step="1">
+                </div>
             </div>
         </div>
         
-        <div class="controls">
-            <div class="control-group">
-                <div class="control-label">
-                    <span>Speed</span>
-                    <span class="value" id="speedValue">1.0</span>
-                </div>
-                <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
-            </div>
-            
-            <div class="control-group">
-                <div class="control-label">
-                    <span>Volume</span>
-                    <span class="value" id="volumeValue">1.0</span>
-                </div>
-                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
-            </div>
-            
-            <div class="control-group">
-                <div class="control-label">
-                    <span>Jump by Words</span>
-                </div>
-                <div class="jump-controls">
-                    <button class="jump-btn negative" data-words="-10">-10</button>
-                    <button class="jump-btn negative" data-words="-9">-9</button>
-                    <button class="jump-btn negative" data-words="-8">-8</button>
-                    <button class="jump-btn negative" data-words="-7">-7</button>
-                    <button class="jump-btn negative" data-words="-6">-6</button>
-                    <button class="jump-btn negative" data-words="-5">-5</button>
-                    <button class="jump-btn negative" data-words="-4">-4</button>
-                    <button class="jump-btn negative" data-words="-3">-3</button>
-                    <button class="jump-btn negative" data-words="-2">-2</button>
-                    <button class="jump-btn negative" data-words="-1">-1</button>
-                    <button class="jump-btn" data-words="1">+1</button>
-                    <button class="jump-btn" data-words="2">+2</button>
-                    <button class="jump-btn" data-words="3">+3</button>
-                    <button class="jump-btn" data-words="4">+4</button>
-                    <button class="jump-btn" data-words="5">+5</button>
-                    <button class="jump-btn" data-words="6">+6</button>
-                    <button class="jump-btn" data-words="7">+7</button>
-                    <button class="jump-btn" data-words="8">+8</button>
-                    <button class="jump-btn" data-words="9">+9</button>
-                    <button class="jump-btn" data-words="10">+10</button>
+        <div class="sidebar">
+            <div class="output-header">
+                <h3>Phonetics Output</h3>
+                <div class="toggle-buttons">
+                    <button id="ipaBtn" class="toggle-btn active">IPA</button>
+                    <button id="englishBtn" class="toggle-btn">English</button>
                 </div>
             </div>
-            
-            <div class="control-group word-slider-container">
-                <div class="control-label">
-                    <span>Word Navigation</span>
-                    <span class="value" id="wordPosition">Word 0 of 0</span>
-                </div>
-                <input type="range" id="wordSlider" class="word-slider" min="0" value="0" step="1">
-            </div>
-        </div>
-        
-        <div class="output">
-            <h3>Phonetics Output</h3>
             <div id="phoneticsOutput"></div>
             <div class="word-count" id="wordCount">Total words: 0</div>
         </div>
@@ -345,6 +407,8 @@
             const wordPosition = document.getElementById('wordPosition');
             const wordCount = document.getElementById('wordCount');
             const phoneticsOutput = document.getElementById('phoneticsOutput');
+            const ipaBtn = document.getElementById('ipaBtn');
+            const englishBtn = document.getElementById('englishBtn');
             
             // Speech synthesis setup
             const synth = window.speechSynthesis;
@@ -353,6 +417,7 @@
             let currentWordIndex = -1;
             let isPaused = false;
             let wordStartTimes = [];
+            let showIPA = true;
             
             // Update slider values display
             speedSlider.addEventListener('input', () => {
@@ -373,20 +438,89 @@
                 }
             });
             
+            // Toggle between IPA and English
+            ipaBtn.addEventListener('click', () => {
+                showIPA = true;
+                ipaBtn.classList.add('active');
+                englishBtn.classList.remove('active');
+                updatePhoneticsDisplay();
+            });
+            
+            englishBtn.addEventListener('click', () => {
+                showIPA = false;
+                englishBtn.classList.add('active');
+                ipaBtn.classList.remove('active');
+                updatePhoneticsDisplay();
+            });
+            
             // Generate simple phonetics (for demonstration)
-            function generatePhonetics(text) {
+            function generatePhonetics(text, useIPA) {
                 // This is a simplified demonstration - real phonetics would require a library
                 const words = text.split(' ');
-                return words.map(word => {
-                    // Simple transformation for demonstration
-                    if (word.length <= 2) return word;
-                    
-                    // Add phonetic-like formatting
-                    if (word.endsWith('.')) {
-                        return word.substring(0, 2) + '-' + word.substring(2, word.length-1) + '(.)';
-                    }
-                    return word.substring(0, 2) + '-' + word.substring(2);
+                
+                if (useIPA) {
+                    // Mock IPA representation
+                    return words.map(word => {
+                        if (word.toLowerCase() === "the") return "ðə";
+                        if (word.toLowerCase() === "quick") return "kwɪk";
+                        if (word.toLowerCase() === "brown") return "braʊn";
+                        if (word.toLowerCase() === "fox") return "fɒks";
+                        if (word.toLowerCase() === "jumps") return "dʒʌmps";
+                        if (word.toLowerCase() === "over") return "ˈəʊvə";
+                        if (word.toLowerCase() === "lazy") return "ˈleɪzi";
+                        if (word.toLowerCase() === "dog") return "dɒɡ";
+                        if (word.toLowerCase() === "this") return "ðɪs";
+                        if (word.toLowerCase() === "sentence") return "ˈsɛntəns";
+                        if (word.toLowerCase() === "contains") return "kənˈteɪnz";
+                        if (word.toLowerCase() === "all") return "ɔːl";
+                        if (word.toLowerCase() === "letters") return "ˈlɛtəz";
+                        if (word.toLowerCase() === "of") return "ɒv";
+                        if (word.toLowerCase() === "english") return "ˈɪŋɡlɪʃ";
+                        if (word.toLowerCase() === "alphabet") return "ˈælfəbɛt";
+                        
+                        // Default transformation for unknown words
+                        if (word.length <= 2) return word;
+                        if (word.endsWith('.')) {
+                            return word.substring(0, 2) + '-' + word.substring(2, word.length-1);
+                        }
+                        return word.substring(0, 2) + '-' + word.substring(2);
+                    }).join(' ');
+                } else {
+                    // Simple English phonetics
+                    return words.map(word => {
+                        if (word.length <= 3) return word;
+                        
+                        if (word.endsWith('.')) {
+                            return word.substring(0, 2) + '-' + word.substring(2, word.length-1) + '(.)';
+                        }
+                        return word.substring(0, 2) + '-' + word.substring(2);
+                    }).join(' ');
+                }
+            }
+            
+            // Update phonetics display based on current mode
+            function updatePhoneticsDisplay() {
+                const text = inputText.value.trim();
+                if (text === '') return;
+                
+                const phonetics = generatePhonetics(text, showIPA);
+                words = text.split(' ');
+                
+                phoneticsOutput.innerHTML = words.map((word, index) => {
+                    const phoneticWord = generatePhonetics(word, showIPA);
+                    return `<span id="word-${index}" class="${showIPA ? 'ipa' : ''}">${phoneticWord}</span>`;
                 }).join(' ');
+                
+                wordCount.textContent = `Total words: ${words.length}`;
+                
+                // Set up word slider
+                wordSlider.max = words.length - 1;
+                wordSlider.value = currentWordIndex >= 0 ? currentWordIndex : 0;
+                
+                // Re-highlight current word if needed
+                if (currentWordIndex >= 0) {
+                    highlightWord(currentWordIndex);
+                }
             }
             
             // Highlight the current word being spoken
@@ -445,19 +579,8 @@
                 const text = inputText.value.trim();
                 if (text === '') return;
                 
-                // Generate and display phonetics
-                const phonetics = generatePhonetics(text);
-                words = text.split(' ');
-                
-                phoneticsOutput.innerHTML = words.map((word, index) => {
-                    return `<span id="word-${index}">${word}</span>`;
-                }).join(' ');
-                
-                wordCount.textContent = `Total words: ${words.length}`;
-                
-                // Set up word slider
-                wordSlider.max = words.length - 1;
-                wordSlider.value = 0;
+                // Update phonetics display
+                updatePhoneticsDisplay();
                 
                 // Create utterance
                 utterance = new SpeechSynthesisUtterance(text);
@@ -608,13 +731,10 @@
                 jumpToWord(wordIndex);
             });
             
-            // Initialize with example phonetics
+            // Initialize with example text
             const sampleText = inputText.value;
             words = sampleText.split(' ');
-            phoneticsOutput.innerHTML = words.map((word, index) => {
-                return `<span id="word-${index}">${word}</span>`;
-            }).join(' ');
-            wordCount.textContent = `Total words: ${words.length}`;
+            updatePhoneticsDisplay();
             wordSlider.max = words.length - 1;
             wordPosition.textContent = `Word 0 of ${words.length}`;
         });
