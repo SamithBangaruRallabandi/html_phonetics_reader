@@ -297,6 +297,17 @@
             font-size: 20px;
         }
         
+        .android-warning {
+            display: none;
+            background-color: #ffecb3;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #7d6608;
+            text-align: center;
+        }
+        
         @media (max-width: 900px) {
             .main-container {
                 flex-direction: column;
@@ -348,6 +359,10 @@
                     <button id="pauseBtn">Pause</button>
                     <button id="resumeBtn">Resume</button>
                     <button id="stopBtn">Stop</button>
+                </div>
+                
+                <div class="android-warning" id="androidWarning">
+                    Word highlighting may not work on some Android devices. Try using Chrome browser for best results.
                 </div>
             </div>
             
@@ -440,6 +455,13 @@
             const englishBtn = document.getElementById('englishBtn');
             const clearBtn = document.getElementById('clearBtn');
             const pasteBtn = document.getElementById('pasteBtn');
+            const androidWarning = document.getElementById('androidWarning');
+            
+            // Check if Android device
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            if (isAndroid) {
+                androidWarning.style.display = 'block';
+            }
             
             // Speech synthesis setup
             const synth = window.speechSynthesis;
@@ -449,6 +471,7 @@
             let isPaused = false;
             let wordStartTimes = [];
             let showIPA = true;
+            let wordTimingInterval = null;
             
             // Check for URL parameters
             const urlParams = new URLSearchParams(window.location.search);
@@ -460,11 +483,16 @@
             // Update slider values display
             speedSlider.addEventListener('input', () => {
                 speedValue.textContent = speedSlider.value;
-                if (utterance && synth.speaking) {
+                if (utterance) {
                     utterance.rate = parseFloat(speedSlider.value);
-                    if (!isPaused) {
+                    // Restart speech to apply changes in real-time
+                    if (synth.speaking && !isPaused) {
+                        const wasPaused = isPaused;
+                        const currentTime = synth.paused ? currentWordIndex : currentWordIndex + 0.5;
                         synth.cancel();
-                        synth.speak(utterance);
+                        if (!wasPaused) {
+                            jumpToWord(Math.floor(currentTime));
+                        }
                     }
                 }
             });
@@ -630,6 +658,22 @@
                 return wordTimes;
             }
             
+            // Start word timing (fallback for Android)
+            function startWordTiming(text, rate) {
+                clearInterval(wordTimingInterval);
+                const wordTimes = estimateWordStartTimes(text, rate);
+                let currentIndex = 0;
+                
+                wordTimingInterval = setInterval(() => {
+                    if (currentIndex < wordTimes.length - 1) {
+                        currentIndex++;
+                        highlightWord(currentIndex);
+                    } else {
+                        clearInterval(wordTimingInterval);
+                    }
+                }, 600); // Average word duration
+            }
+            
             // Speak the text
             function speakText() {
                 if (synth.speaking && !isPaused) {
@@ -650,7 +694,7 @@
                 // Estimate word start times
                 wordStartTimes = estimateWordStartTimes(text, utterance.rate);
                 
-                // Track words as they're spoken
+                // Track words as they're spoken (if supported)
                 utterance.onboundary = function(event) {
                     if (event.name === 'word') {
                         const charIndex = event.charIndex;
@@ -671,7 +715,17 @@
                     currentWordIndex = -1;
                     speakBtn.textContent = 'Speak';
                     isPaused = false;
+                    clearInterval(wordTimingInterval);
                 };
+                
+                utterance.onerror = function() {
+                    clearInterval(wordTimingInterval);
+                };
+                
+                // Start fallback timing for Android
+                if (isAndroid) {
+                    startWordTiming(text, utterance.rate);
+                }
                 
                 synth.speak(utterance);
                 speakBtn.textContent = 'Speaking...';
@@ -684,6 +738,7 @@
                     synth.pause();
                     isPaused = true;
                     pauseBtn.textContent = 'Paused';
+                    clearInterval(wordTimingInterval);
                 }
             }
             
@@ -693,6 +748,11 @@
                     synth.resume();
                     isPaused = false;
                     pauseBtn.textContent = 'Pause';
+                    
+                    // Restart timing for Android
+                    if (isAndroid) {
+                        startWordTiming(inputText.value.trim(), utterance.rate);
+                    }
                 }
             }
             
@@ -704,6 +764,7 @@
                     highlightWord(-1);
                     isPaused = false;
                     pauseBtn.textContent = 'Pause';
+                    clearInterval(wordTimingInterval);
                 }
             }
             
@@ -716,6 +777,7 @@
                 
                 // Stop current speech
                 synth.cancel();
+                clearInterval(wordTimingInterval);
                 
                 // Create new utterance starting from the desired word
                 const textToSpeak = words.slice(wordIndex).join(' ');
@@ -744,7 +806,13 @@
                     currentWordIndex = -1;
                     speakBtn.textContent = 'Speak';
                     isPaused = false;
+                    clearInterval(wordTimingInterval);
                 };
+                
+                // Start fallback timing for Android
+                if (isAndroid) {
+                    startWordTiming(textToSpeak, utterance.rate);
+                }
                 
                 synth.speak(utterance);
                 speakBtn.textContent = 'Speaking...';
