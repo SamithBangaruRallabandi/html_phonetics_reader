@@ -81,6 +81,57 @@
             font-size: 14px;
         }
         
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
         .main-container {
             display: flex;
             width: 100%;
@@ -494,6 +545,14 @@
             <span class="control-label">of</span>
             <span id="totalWords">0</span>
         </div>
+        
+        <div class="switch-container">
+            <span class="control-label">Loop:</span>
+            <label class="switch">
+                <input type="checkbox" id="loopSwitch">
+                <span class="slider"></span>
+            </label>
+        </div>
     </div>
     
     <div class="main-container">
@@ -608,6 +667,7 @@
             const pasteBtn = document.getElementById('pasteBtn');
             const androidWarning = document.getElementById('androidWarning');
             const voiceSelect = document.getElementById('voiceSelect');
+            const loopSwitch = document.getElementById('loopSwitch');
             
             // Check if Android device
             const isAndroid = /Android/i.test(navigator.userAgent);
@@ -625,6 +685,7 @@
             let showIPA = false; // English by default
             let wordTimingInterval = null;
             let voices = [];
+            let loopEnabled = false;
             
             // Load available voices
             function loadVoices() {
@@ -664,6 +725,11 @@
             if (textParam) {
                 inputText.value = decodeURIComponent(textParam);
             }
+            
+            // Loop switch handler
+            loopSwitch.addEventListener('change', function() {
+                loopEnabled = this.checked;
+            });
             
             // Update input values
             speedInput.addEventListener('change', () => {
@@ -932,7 +998,13 @@
                 if (currentWordIndex >= words.length - 1 || isPaused) {
                     // Reached the end or paused
                     if (currentWordIndex >= words.length - 1) {
-                        stopSpeaking();
+                        if (loopEnabled) {
+                            // If loop is enabled, start from the beginning
+                            currentWordIndex = -1;
+                            setTimeout(speakWordByWord, 500);
+                        } else {
+                            stopSpeaking();
+                        }
                     }
                     return;
                 }
@@ -1026,11 +1098,17 @@
                     };
                     
                     utterance.onend = function() {
-                        currentWordIndex = -1;
-                        isSpeaking = false;
-                        isPaused = false;
-                        updateButtonStates();
-                        wordPosition.textContent = `0/${words.length}`;
+                        if (loopEnabled && !isPaused) {
+                            // If loop is enabled, start from the beginning
+                            currentWordIndex = -1;
+                            setTimeout(speakText, 500);
+                        } else {
+                            currentWordIndex = -1;
+                            isSpeaking = false;
+                            isPaused = false;
+                            updateButtonStates();
+                            wordPosition.textContent = `0/${words.length}`;
+                        }
                     };
                     
                     utterance.onerror = function() {
