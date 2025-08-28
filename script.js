@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const androidWarning = document.getElementById('androidWarning');
     const voiceSelect = document.getElementById('voiceSelect');
     const loopSwitch = document.getElementById('loopSwitch');
-    //autocorrectbtn
+
     const autoCorrectBtn = document.getElementById('autoCorrectBtn');
 
     // Check if Android device
@@ -613,6 +613,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+    // Event listeners
     jumpButtons.forEach(button => {
         button.addEventListener('click', () => {
             const words = parseInt(button.getAttribute('data-words'));
