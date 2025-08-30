@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const voiceSelect = document.getElementById('voiceSelect');
     const loopSwitch = document.getElementById('loopSwitch');
 
+    const autoCorrectBtn = document.getElementById('autoCorrectBtn');
+
     // Check if Android device
     const isAndroid = /Android/i.test(navigator.userAgent);
     if (isAndroid) {
@@ -529,6 +531,87 @@ document.addEventListener('DOMContentLoaded', function () {
 
         jumpToWord(newIndex);
     }
+
+    async function correctText(text) {
+        try {
+            autoCorrectBtn.textContent = 'Correcting...';
+            autoCorrectBtn.disabled = true;
+
+            const response = await fetch(
+                `https://text.pollinations.ai/${encodeURIComponent("Autocorrect this: " + text)}`
+            );
+
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+
+            let correctedText = await response.text();
+            
+            // Remove the unwanted prefix from the API response
+            const unwantedPrefix = "Sure! Here's the corrected version:";
+            if (correctedText.startsWith(unwantedPrefix)) {
+                correctedText = correctedText.substring(unwantedPrefix.length).trim();
+            }
+            
+            // Remove other common AI response prefixes
+            const prefixesToRemove = [
+                "Certainly! Here's the corrected text:",
+                "Here's the corrected version:",
+                "The corrected text is:",
+                "Corrected text:"
+            ];
+            
+            for (const prefix of prefixesToRemove) {
+                if (correctedText.startsWith(prefix)) {
+                    correctedText = correctedText.substring(prefix.length).trim();
+                    break;
+                }
+            }
+            
+            // Create JSON output
+            const jsonOutput = {
+                originalText: text,
+                correctedText: correctedText,
+                timestamp: new Date().toISOString(),
+                success: true
+            };
+            
+            inputText.value = correctedText;
+            updatePhoneticsDisplay();
+            
+            // Return the JSON object
+            return jsonOutput;
+            
+        } catch (error) {
+            console.error('Error correcting text:', error);
+            const errorOutput = {
+                originalText: text,
+                error: error.message,
+                timestamp: new Date().toISOString(),
+                success: false
+            };
+            alert('Failed to correct text. Please try again.');
+            return errorOutput;
+        } finally {
+            autoCorrectBtn.textContent = 'Auto Correct';
+            autoCorrectBtn.disabled = false;
+        }
+    }
+
+
+    // Event listeners
+    autoCorrectBtn.addEventListener('click', () => {
+        const text = inputText.value.trim();
+        if (text === '') {
+            alert('Please enter some text to correct.');
+            return;
+        }
+        
+        correctText(text);
+    });
+
+
+
 
     // Event listeners
     jumpButtons.forEach(button => {

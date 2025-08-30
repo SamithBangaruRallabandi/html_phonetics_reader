@@ -231,6 +231,25 @@ button:hover {
 button:active {
     transform: translateY(0);
 }
+/* 🔥 Highlight Auto Correct button */
+.autocorrect-btn {
+    background-color: #ffaa00;  /* orange */
+    font-weight: bold;
+    transform: scale(1.1);
+    transition: 0.2s;
+}
+
+.autocorrect-btn:hover {
+    background-color: #e68900; /* darker orange */
+    transform: scale(1.15);
+}
+
+.autocorrect-btn:disabled {
+    background-color: #bdbdbd;
+    transform: none;
+    cursor: not-allowed;
+}
+
 
 #toggleSpeakBtn {
     background-color: #4CAF50;
