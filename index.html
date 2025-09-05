@@ -73,10 +73,23 @@
             <div class="input-section">
                 <textarea id="inputText" placeholder="Enter a sentence to see its phonetics and hear it spoken aloud...">The quick brown fox jumps over the lazy dog. This sentence contains all letters of the English alphabet.</textarea>
                 
+                <!-- System Prompt Dropdown Section -->
+                <div class="system-prompt-section">
+                    <div class="section-label">
+                        <span>System Prompt</span>
+                        <button id="managePromptsBtn" class="text-btn">Manage</button>
+                    </div>
+                    <select id="promptSelect" class="prompt-select">
+                        <option value="autocorrect">Autocorrect this text</option>
+                        <option value="dictionary">Define this word</option>
+                        <option value="translate">Translate to English</option>
+                    </select>
+                </div>
+                
                 <div class="text-controls">
                     <button class="text-btn" id="clearBtn">Clear Text</button>
                     <button class="text-btn" id="pasteBtn">Paste from Clipboard</button>
-                    <button class="text-btn" id="autoCorrectBtn">Auto Correct</button>
+                    <button class="text-btn" id="autoCorrectBtn">Apply Prompt</button>
                 </div>
                 
                 <div class="android-warning" id="androidWarning">
@@ -136,6 +149,26 @@
                         <button class="jump-btn" data-words="9">+9</button>
                         <button class="jump-btn" data-words="10">+10</button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="promptsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manage Custom Prompts</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="custom-prompt-form">
+                    <input type="text" id="newPromptName" placeholder="Prompt name" class="modal-input">
+                    <textarea id="newPromptText" placeholder="Enter your custom prompt template. Use {text} as placeholder for the input text." class="modal-textarea"></textarea>
+                    <button id="addPromptBtn" class="text-btn">Add Prompt</button>
+                </div>
+                <div class="custom-prompts-list">
+                    <h3>Your Custom Prompts</h3>
+                    <ul id="customPromptsList"></ul>
                 </div>
             </div>
         </div>
