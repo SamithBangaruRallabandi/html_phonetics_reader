@@ -705,3 +705,100 @@ select {
         flex-direction: column;
     }
 }
+
+
+.prompt-hint {
+    font-size: 12px;
+    color: #666;
+    margin-top: -8px;
+    margin-bottom: 10px;
+}
+
+.modal-input:focus, .modal-textarea:focus {
+    border-color: #6e8efb;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(110, 142, 251, 0.2);
+}
+
+.confirmation-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 3000;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.confirmation-toast.show {
+    opacity: 1;
+}
+
+/* Microphone button styles */
+#microphoneBtn {
+    background-color: #6e8efb;
+    position: relative;
+    overflow: hidden;
+}
+
+#microphoneBtn.listening {
+    background-color: #f44336;
+    animation: pulse 1.5s infinite;
+}
+
+#microphoneBtn:disabled {
+    background-color: #ccc;
+    animation: none;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Recognition status indicator */
+.recognition-status {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    z-index: 1000;
+    display: none;
+}
+
+.recognition-status.active {
+    display: block;
+}
+
+/* Highlight for recognized words */
+.recognized {
+    background-color: #ffeb3b;
+    color: #333;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: background-color 0.5s ease-out;
+}
+
+/* highlighting */
+.input-highlight {
+    background-color: #ffeb3b;
+    color: #333;
+    padding: 2px 0;
+    border-radius: 3px;
+    animation: fadeHighlight 2s forwards;
+}
+
+@keyframes fadeHighlight {
+    0% { background-color: #ffeb3b; }
+    100% { background-color: transparent; }
+}

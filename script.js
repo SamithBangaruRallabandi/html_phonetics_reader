@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const newPromptText = document.getElementById('newPromptText');
     const addPromptBtn = document.getElementById('addPromptBtn');
     const customPromptsList = document.getElementById('customPromptsList');
+    const microphoneBtn = document.getElementById('microphoneBtn');
 
     // Check if Android device
     const isAndroid = /Android/i.test(navigator.userAgent);
@@ -52,6 +53,16 @@ document.addEventListener('DOMContentLoaded', function () {
     let voices = [];
     let loopEnabled = false;
 
+    // Speech recognition variables
+    let recognition = null;
+    let isListening = false;
+    let recognizedWords = [];
+
+    // Create recognition status element
+    const recognitionStatus = document.createElement('div');
+    recognitionStatus.className = 'recognition-status';
+    document.body.appendChild(recognitionStatus);
+
     // Prompt system variables
     let customPrompts = {};
     const defaultPrompts = {
@@ -68,6 +79,26 @@ document.addEventListener('DOMContentLoaded', function () {
             updatePromptSelect();
             renderCustomPromptsList();
         }
+    }
+    
+    // Check for speech recognition support
+    function checkSpeechRecognitionSupport() {
+        if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+            // Show a message to the user
+            const warning = document.createElement('div');
+            warning.className = 'android-warning';
+            warning.textContent = 'Speech recognition is not supported in your browser. Try using Chrome or Edge.';
+            warning.style.display = 'block';
+            warning.style.marginTop = '10px';
+            
+            // Insert after the microphone button
+            microphoneBtn.parentNode.insertBefore(warning, microphoneBtn.nextSibling);
+            
+            // Disable the microphone button
+            microphoneBtn.disabled = true;
+            return false;
+        }
+        return true;
     }
 
     // Save prompts to localStorage
@@ -156,6 +187,155 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         
         return promptText;
+    }
+
+    // Initialize speech recognition
+    function initSpeechRecognition() {
+        if (!checkSpeechRecognitionSupport()) {
+            return;
+        }
+        
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        // Recognition event handlers
+        recognition.onstart = function() {
+            isListening = true;
+            microphoneBtn.textContent = '🔴 Stop';
+            microphoneBtn.classList.add('listening');
+            recognitionStatus.textContent = 'Listening...';
+            recognitionStatus.classList.add('active');
+            recognizedWords = [];
+        };
+
+        recognition.onresult = function(event) {
+            let interimTranscript = '';
+            
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    // Store current text and selection
+                    const currentText = inputText.value;
+                    const startPos = inputText.selectionStart;
+                    const endPos = inputText.selectionEnd;
+                    
+                    // Add the recognized text
+                    const newText = currentText.substring(0, startPos) + 
+                                transcript + 
+                                currentText.substring(endPos, currentText.length);
+                    
+                    inputText.value = newText;
+                    
+                    // Highlight the newly added words in the input field
+                    highlightInputText(startPos, startPos + transcript.length);
+                    
+                    // Update phonetics display
+                    updatePhoneticsDisplay();
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+            
+            // Show interim results in status
+            if (interimTranscript) {
+                recognitionStatus.textContent = 'Listening: ' + interimTranscript;
+            }
+        };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error', event.error);
+                    recognitionStatus.textContent = 'Error: ' + event.error;
+                    stopRecognition();
+                    
+                    // Reset after a delay
+                    setTimeout(() => {
+                        recognitionStatus.classList.remove('active');
+                    }, 2000);
+                };
+
+                recognition.onend = function() {
+                    stopRecognition();
+                    recognitionStatus.textContent = 'Speech recognition ended';
+                    
+                    // Hide status after a delay
+                    setTimeout(() => {
+                        recognitionStatus.classList.remove('active');
+                    }, 2000);
+                };
+            }
+
+    // Start speech recognition
+    function startRecognition() {
+        if (recognition) {
+            try {
+                recognition.start();
+            } catch (error) {
+                console.error('Recognition start error:', error);
+                // Try again after a short delay if already started
+                setTimeout(() => {
+                    if (!isListening) {
+                        recognition.start();
+                    }
+                }, 100);
+            }
+        }
+    }
+
+    // Stop speech recognition
+    function stopRecognition() {
+        if (recognition && isListening) {
+            recognition.stop();
+            isListening = false;
+            microphoneBtn.textContent = '🎤 Speech Input';
+            microphoneBtn.classList.remove('listening');
+        }
+    }
+
+    // Toggle recognition
+    function toggleRecognition() {
+        if (isListening) {
+            stopRecognition();
+        } else {
+            startRecognition();
+        }
+    }
+
+    function highlightInputText(start, end) {
+        inputText.focus();
+        inputText.setSelectionRange(start, end);
+        
+        // Use a temporary marker to create a highlight effect
+        setTimeout(() => {
+            // Scroll to the highlighted area
+            inputText.scrollLeft = inputText.scrollWidth;
+            
+            // Remove selection after a delay to create highlight effect
+            setTimeout(() => {
+                inputText.setSelectionRange(end, end);
+            }, 500);
+        }, 10);
+    }
+
+    // Function to highlight a recognized word temporarily
+    function highlightRecognizedWord(wordIndex) {
+        // Wait a bit to ensure DOM is updated
+        setTimeout(() => {
+            const wordElement = document.getElementById(`word-${wordIndex}`);
+            if (wordElement) {
+                // Add recognition highlight class
+                wordElement.classList.add('recognized');
+                
+                // Remove highlight after a short delay
+                setTimeout(() => {
+                    if (wordElement) {
+                        wordElement.classList.remove('recognized');
+                    }
+                }, 1000);
+            }
+        }, 50);
     }
 
     // Modal functionality
@@ -802,6 +982,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const sampleText = inputText.value;
     words = sampleText.split(' ');
     updatePhoneticsDisplay();
+
+    // Initialize speech recognition and add event listener
+    if (microphoneBtn) {
+        initSpeechRecognition();
+        microphoneBtn.addEventListener('click', toggleRecognition);
+    }
 
     // Initialize button states
     updateButtonStates();
