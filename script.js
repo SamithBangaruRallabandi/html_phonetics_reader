@@ -429,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (word.toLowerCase() === "all") return "ɔːl";
                 if (word.toLowerCase() === "letters") return "ˈlɛtəz";
                 if (word.toLowerCase() === "of") return "ɒv";
-                if (word.toLowerCase() === "english") return "ˈɪŋɡlɪʃ";
+                if (word.toLowerCase() === "english") return "ˈɪŋɡlīʃ";
                 if (word.toLowerCase() === "alphabet") return "ˈælfəbɛt";
 
                 // Default transformation for unknown words
@@ -776,7 +776,7 @@ document.addEventListener('DOMContentLoaded', function () {
         processTextWithPrompt(text);
     });
 
-    // Event listeners
+    // Event listeners for jump buttons and word slider
     jumpButtons.forEach(button => {
         button.addEventListener('click', () => {
             const words = parseInt(button.getAttribute('data-words'));
