@@ -956,7 +956,6 @@ document.addEventListener('DOMContentLoaded', function () {
         processTextWithPrompt(text);
     });
 
-    // Event listeners for jump buttons and word slider
     jumpButtons.forEach(button => {
         button.addEventListener('click', () => {
             const words = parseInt(button.getAttribute('data-words'));
