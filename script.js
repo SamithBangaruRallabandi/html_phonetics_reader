@@ -1373,6 +1373,7 @@ document.addEventListener('DOMContentLoaded', function () {
         updatePhoneticsDisplay();
     });
 
+    // Event listeners
     jumpButtons.forEach(button => {
         button.addEventListener('click', () => {
             const words = parseInt(button.getAttribute('data-words'));
