@@ -93,7 +93,28 @@ function signOut() {
         });
 }
 
-// Update the loadUserData function to properly display history items
+// deleteHistoryItem 
+function deleteHistoryItem(id) {
+    if (!currentUser) {
+        alert("You must be logged in to delete history");
+        return;
+    }
+    
+    if (confirm("Are you sure you want to delete this history item?")) {
+        usersRef(currentUser.uid).collection("history").doc(id).delete()
+        .then(() => {
+            console.log("History item deleted");
+            // Refresh the history list after deletion
+            loadUserData();
+        })
+        .catch((error) => {
+            console.error("Error deleting history item: ", error);
+            alert("Error deleting history item: " + error.message);
+        });
+    }
+}
+
+// loadUserData function to display history items
 function loadUserData() {
     if (!currentUser) {
         console.log("No user logged in, cannot load history");
@@ -137,13 +158,17 @@ function loadUserData() {
             const delBtn = document.createElement("button");
             delBtn.textContent = "Delete";
             delBtn.className = "text-btn delete-btn";
-            delBtn.onclick = () => deleteHistoryItem(doc.id);
+            delBtn.addEventListener('click', function() {
+                deleteHistoryItem(doc.id);
+            });
 
-            // Publish button
+            // Publish button - FIXED
             const pubBtn = document.createElement("button");
             pubBtn.textContent = "Publish";
             pubBtn.className = "text-btn publish-btn";
-            pubBtn.onclick = () => openPublishModal(doc.id, item.text);
+            pubBtn.addEventListener('click', function() {
+                openPublishModal(doc.id, item.text);
+            });
 
             buttonContainer.appendChild(pubBtn);
             buttonContainer.appendChild(delBtn);
@@ -201,28 +226,28 @@ function setupPublishHandler() {
         });
     };
 }
-    function loadCommunityReads() {
-        communityRef.orderBy("createdAt", "desc").onSnapshot(snapshot => {
-            const list = document.getElementById("communityList");
-            list.innerHTML = "";
-            
-            if (snapshot.empty) {
-                list.innerHTML = "<li>No community reads yet. Be the first to publish!</li>";
-                return;
-            }
-            
-            snapshot.forEach(doc => {
-                const item = doc.data();
-                const li = document.createElement("li");
-                li.textContent = `${item.text} [${item.class}] (${item.tags.join(", ")})`;
-                list.appendChild(li);
-            });
-        }, error => {
-            console.error("Error loading community reads: ", error);
-            document.getElementById("communityList").innerHTML = "<li>Error loading community reads</li>";
-        });
-    }
 
+function loadCommunityReads() {
+    communityRef.orderBy("createdAt", "desc").onSnapshot(snapshot => {
+        const list = document.getElementById("communityList");
+        list.innerHTML = "";
+        
+        if (snapshot.empty) {
+            list.innerHTML = "<li>No community reads yet. Be the first to publish!</li>";
+            return;
+        }
+        
+        snapshot.forEach(doc => {
+            const item = doc.data();
+            const li = document.createElement("li");
+            li.textContent = `${item.text} [${item.class}] (${item.tags.join(", ")})`;
+            list.appendChild(li);
+        });
+    }, error => {
+        console.error("Error loading community reads: ", error);
+        document.getElementById("communityList").innerHTML = "<li>Error loading community reads</li>";
+    });
+}
 
 // ===== END FIREBASE INITIALIZATION =====
 
@@ -1202,21 +1227,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function deleteHistoryItem(id) {
-        if (!currentUser) {
-            alert("You must be logged in to delete history");
-            return;
-        }
-        
-        usersRef(currentUser.uid).collection("history").doc(id).delete()
-        .then(() => {
-            console.log("History item deleted");
-        })
-        .catch((error) => {
-            console.error("Error deleting history item: ", error);
-            alert("Error deleting history item");
-        });
-    }
+
     document.getElementById("searchHistory").addEventListener("input", (e) => {
         const term = e.target.value.toLowerCase();
         document.querySelectorAll("#historyList li").forEach(li => {
