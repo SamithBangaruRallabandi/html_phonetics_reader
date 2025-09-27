@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RMV6FJHHE4"></script>
+     <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+
+    <!-- Firebase Analytics -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- Cloud Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -20,6 +32,18 @@
 </head>
 <body>
     <div class="sticky-header">
+        <!-- Add this auth section at the beginning of the sticky header -->
+        <div class="auth-section">
+            <button id="signInButton" class="auth-btn" style="display: none;">
+                Sign in with Google
+            </button>
+            <div id="userInfo" style="display: none; align-items: center; gap: 8px;">
+                <img id="userPhoto" width="30" height="30" style="border-radius: 50%;">
+                <span id="userName"></span>
+                <button id="signOutButton" class="auth-btn">Sign out</button>
+            </div>
+        </div>
+        
         <div class="control-buttons">
             <button id="toggleSpeakBtn">Speak</button>
             <button id="pauseBtn">Pause</button>
@@ -175,6 +199,77 @@
         </div>
     </div>
 
+    <div class="history-section">
+        <h3>Your Reading History</h3>
+
+        <!-- Search Box -->
+        <input type="text" id="searchHistory" placeholder="Search history...">
+
+        <!-- History List -->
+        <ul id="historyList"></ul>
+
+        <div class="history-controls">
+            <button id="refreshHistoryBtn">Refresh History</button>
+            <button id="clearHistoryBtn">Clear All History</button>
+        </div>
+    </div>
+        
+    <div id="publishModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h2>Publish Read</h2>
+            <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+            <p id="publishTextPreview"></p>
+            
+            <!-- Class Selector -->
+            <label for="publishClass">Class/Category:</label>
+            <select id="publishClass">
+                <option value="general">General</option>
+                <option value="english">English</option>
+                <option value="phonetics">Phonetics</option>
+                <option value="linguistics">Linguistics</option>
+            </select>
+
+            <!-- Tags Input -->
+            <label for="publishTags">Tags (comma separated):</label>
+            <input type="text" id="publishTags" placeholder="e.g., vowels, IPA, practice">
+
+            <!-- Publish Button -->
+            <button id="confirmPublishBtn">Publish</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="community-section">
+        <h3>Community Reads</h3>
+
+        <!-- Filters -->
+        <div class="community-filters">
+            <label for="filterClass">Class:</label>
+            <select id="filterClass">
+                <option value="">All</option>
+                <option value="english">English</option>
+                <option value="phonetics">Phonetics</option>
+                <option value="linguistics">Linguistics</option>
+            </select>
+
+            <label for="filterDate">Date Range:</label>
+            <input type="date" id="filterStart"> to 
+            <input type="date" id="filterEnd">
+
+            <label for="filterTags">Tags:</label>
+            <input type="text" id="filterTags" placeholder="comma separated">
+            
+            <button id="applyFiltersBtn">Apply Filters</button>
+        </div>
+
+        <!-- Published Reads List -->
+        <ul id="communityList"></ul>
+    </div>
+
+    
     <script src="script.js"></script>
 </body>
 </html>
