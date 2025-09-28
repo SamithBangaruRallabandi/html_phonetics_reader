@@ -289,8 +289,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const addPromptBtn = document.getElementById('addPromptBtn');
     const customPromptsList = document.getElementById('customPromptsList');
     const microphoneBtn = document.getElementById('microphoneBtn');
-
-=======
     const signInButton = document.getElementById('signInButton');
     const signOutButton = document.getElementById('signOutButton');
 
@@ -542,7 +540,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     }, 2000);
                 };
             }
-=======
         recognition.onerror = function(event) {
             console.error('Speech recognition error', event.error);
             recognitionStatus.textContent = 'Error: ' + event.error;
@@ -1374,11 +1371,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-=======
-
-
-=======
-
     function saveReadToHistory(text) {
         if (!currentUser) {
             console.log("User not logged in, cannot save history");
@@ -1553,8 +1545,6 @@ document.addEventListener('DOMContentLoaded', function () {
         processTextWithPrompt(text);
     });
 
-=======
-
         const result = await processTextWithPrompt(text);
 
         // Optionally log or display the JSON result
@@ -1601,7 +1591,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize button states
     updateButtonStates();
-=======
     // Initialize authentication
     initAuth();
 
@@ -1612,6 +1601,5 @@ document.addEventListener('DOMContentLoaded', function () {
     loadCommunityReads();
 
 });
-=======
-
 });
+
