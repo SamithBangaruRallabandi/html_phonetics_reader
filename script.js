@@ -272,6 +272,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const phoneticsOutput = document.getElementById('phoneticsOutput');
     const ipaBtn = document.getElementById('ipaBtn');
     const englishBtn = document.getElementById('englishBtn');
+    const arpabetBtn = document.getElementById('arpabetBtn');
     const clearBtn = document.getElementById('clearBtn');
     const pasteBtn = document.getElementById('pasteBtn');
     const androidWarning = document.getElementById('androidWarning');
@@ -312,6 +313,21 @@ document.addEventListener('DOMContentLoaded', function () {
     let recognition = null;
     let isListening = false;
     let recognizedWords = [];
+
+    let showARPAbet = false;
+    let currentTranscriptionMode = 'english';
+
+    let transcriptionCache = {
+        ipa: {},
+        arpabet: {}
+    };
+
+    // Clear cache when text changes significantly
+    inputText.addEventListener('input', () => {
+        // Clear cache when user modifies text
+        transcriptionCache.ipa = {};
+        transcriptionCache.arpabet = {};
+    });
 
     // Create recognition status element
     const recognitionStatus = document.createElement('div');
@@ -753,18 +769,34 @@ document.addEventListener('DOMContentLoaded', function () {
         jumpToWord(wordIndex);
     });
 
-    // Toggle between IPA and English
+    // Toggle between IPA, English and ARPAbet
     ipaBtn.addEventListener('click', () => {
         showIPA = true;
+        showARPAbet = false;
+        currentTranscriptionMode = 'ipa';
         ipaBtn.classList.add('active');
+        arpabetBtn.classList.remove('active');
+        englishBtn.classList.remove('active');
+        updatePhoneticsDisplay();
+    });
+
+    arpabetBtn.addEventListener('click', () => {
+        showIPA = false;
+        showARPAbet = true;
+        currentTranscriptionMode = 'arpabet';
+        arpabetBtn.classList.add('active');
+        ipaBtn.classList.remove('active');
         englishBtn.classList.remove('active');
         updatePhoneticsDisplay();
     });
 
     englishBtn.addEventListener('click', () => {
         showIPA = false;
+        showARPAbet = false;
+        currentTranscriptionMode = 'english';
         englishBtn.classList.add('active');
         ipaBtn.classList.remove('active');
+        arpabetBtn.classList.remove('active');
         updatePhoneticsDisplay();
     });
 
@@ -888,7 +920,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Update phonetics display based on current mode
-    function updatePhoneticsDisplay() {
+    async function updatePhoneticsDisplay() {
         const text = inputText.value.trim();
         if (text === '') {
             phoneticsOutput.innerHTML = '';
@@ -897,13 +929,31 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const phonetics = generatePhonetics(text, showIPA);
+        // Always use the original text for word splitting and navigation
         words = text.split(' ');
 
-        phoneticsOutput.innerHTML = words.map((word, index) => {
-            const phoneticWord = generatePhonetics(word, showIPA);
-            return `<span id="word-${index}" class="${showIPA ? 'ipa' : ''}">${phoneticWord}</span>`;
-        }).join(' ');
+        // Show loading state only for API calls
+        if (currentTranscriptionMode !== 'english') {
+            phoneticsOutput.innerHTML = '<div class="loading">Loading transcription...</div>';
+        }
+
+        try {
+            let phonetics;
+            
+            if (currentTranscriptionMode === 'english') {
+                // Use the simple English phonetics (existing functionality)
+                phonetics = generatePhonetics(text, false);
+                displayPhonetics(phonetics);
+            } else {
+                // Call pollinations.ai for IPA or ARPAbet
+                phonetics = await getTranscriptionFromAPI(text, currentTranscriptionMode);
+                displayPhonetics(phonetics);
+            }
+            
+        } catch (error) {
+            console.error('Error getting transcription:', error);
+            phoneticsOutput.innerHTML = '<div class="error">Error loading transcription. Please try again.</div>';
+        }
 
         wordCount.textContent = `Total words: ${words.length}`;
         totalWords.textContent = words.length;
@@ -920,6 +970,67 @@ document.addEventListener('DOMContentLoaded', function () {
         // Re-highlight current word if needed
         if (currentWordIndex >= 0) {
             highlightWord(currentWordIndex);
+        }
+    }
+    async function getTranscriptionFromAPI(text, mode) {
+        // Check cache first
+        const cacheKey = text.toLowerCase().trim();
+        if (transcriptionCache[mode][cacheKey]) {
+            return transcriptionCache[mode][cacheKey];
+        }
+        
+        let prompt;
+        
+        if (mode === 'ipa') {
+            prompt = `Convert the following English text to International Phonetic Alphabet (IPA) transcription. Return only the transcription without any explanations: "${text}"`;
+        } else if (mode === 'arpabet') {
+            prompt = `Convert the following English text to ARPAbet transcription. Return only the transcription without any explanations: "${text}"`;
+        } else {
+            throw new Error('Invalid transcription mode');
+        }
+
+        try {
+            const response = await fetch(
+                `https://text.pollinations.ai/${encodeURIComponent(prompt)}`
+            );
+
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+
+            let transcribedText = await response.text();
+            
+            // More aggressive cleaning for transcription responses
+            transcribedText = transcribedText
+                .replace(/^(Sure!|Certainly!|Here's|The|IPA transcription|ARPAbet transcription)[:\s]+/i, '')
+                .replace(/^["'](.*)["']$/, '$1')
+                .replace(/\.$/, '')
+                .trim();
+            
+            // Cache the result
+            transcriptionCache[mode][cacheKey] = transcribedText;
+            
+            return transcribedText;
+            
+        } catch (error) {
+            console.error('Error calling transcription API:', error);
+            throw error;
+        }
+    }
+    function displayPhonetics(phoneticsText) {
+        if (currentTranscriptionMode === 'english') {
+            // For English mode, show word-by-word highlighting
+            phoneticsOutput.innerHTML = words.map((word, index) => {
+                const phoneticWord = generatePhonetics(word, false);
+                return `<span id="word-${index}" class="english">${phoneticWord}</span>`;
+            }).join(' ');
+        } else {
+            // For IPA and ARPAbet, show the continuous text with appropriate class
+            const className = currentTranscriptionMode === 'ipa' ? 'ipa' : 'arpabet';
+            phoneticsOutput.innerHTML = `<span class="${className}">${phoneticsText}</span>`;
+            
+            // Update words array for navigation (split the transcribed text by spaces)
+            words = phoneticsText.split(' ');
         }
     }
 
@@ -1149,25 +1260,55 @@ document.addEventListener('DOMContentLoaded', function () {
 
             let processedText = await response.text();
             
-            // Clean up the response by removing common prefixes
-            const prefixesToRemove = [
-                "Sure! Here's the corrected version:",
-                "Certainly! Here's the corrected text:",
-                "Here's the corrected version:",
-                "The corrected text is:",
-                "Corrected text:",
-                "Here's the definition:",
-                "The definition is:",
-                "Here's the translation:",
-                "The translation is:"
+            // EXTRACT ONLY THE MAIN RESPONSE
+            // Remove everything after "Optional", "Alternatives", "Variants", etc.
+            const stopPatterns = [
+                '\nOptional',
+                '\nAlternatives',
+                '\nVariants',
+                '\nOther ways',
+                '\nFor example',
+                ' Optional',
+                ' Alternatives',
+                ' Variants'
             ];
             
-            for (const prefix of prefixesToRemove) {
+            for (const pattern of stopPatterns) {
+                const index = processedText.indexOf(pattern);
+                if (index > -1) {
+                    processedText = processedText.substring(0, index);
+                }
+            }
+            
+            // Remove common prefixes like "Autocorrected:", "Corrected:", etc.
+            const prefixes = [
+                "Autocorrected:",
+                "Corrected:",
+                "Translation:",
+                "Definition:",
+                "Sure!",
+                "Certainly!"
+            ];
+            
+            for (const prefix of prefixes) {
                 if (processedText.startsWith(prefix)) {
                     processedText = processedText.substring(prefix.length).trim();
+                    // Remove any colon that might follow
+                    if (processedText.startsWith(':')) {
+                        processedText = processedText.substring(1).trim();
+                    }
                     break;
                 }
             }
+            
+            // Extract the first sentence only
+            const firstSentenceMatch = processedText.match(/^[^.!?]*[.!?]/);
+            if (firstSentenceMatch) {
+                processedText = firstSentenceMatch[0].trim();
+            }
+            
+            // Final cleanup
+            processedText = processedText.trim();
             
             // Create JSON output
             const jsonOutput = {
@@ -1181,7 +1322,7 @@ document.addEventListener('DOMContentLoaded', function () {
             inputText.value = processedText;
             updatePhoneticsDisplay();
             
-            // ADD THIS LINE TO SAVE TO HISTORY
+            // Save to history
             if (currentUser) {
                 saveReadToHistory(processedText);
             }
@@ -1204,7 +1345,6 @@ document.addEventListener('DOMContentLoaded', function () {
             autoCorrectBtn.disabled = false;
         }
     }
-
     function saveReadToHistory(text) {
         if (!currentUser) {
             console.log("User not logged in, cannot save history");
