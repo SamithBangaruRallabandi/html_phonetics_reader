@@ -807,6 +807,8 @@ select {
 @keyframes fadeHighlight {
     0% { background-color: #ffeb3b; }
     100% { background-color: transparent; }
+
+=======
 }
 
 /* ===== AUTHENTICATION STYLES ===== */
@@ -1136,6 +1138,7 @@ select {
 .filter-box,
 .btn {
     display: none;
+
 }
 .loading {
     text-align: center;
@@ -1148,3 +1151,7 @@ select {
     color: #f44336;
     font-weight: bold;
 }
+=======
+
+}
+
