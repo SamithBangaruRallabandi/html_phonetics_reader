@@ -435,6 +435,12 @@ input[type="range"]::-webkit-slider-thumb {
     font-size: 18px;
 }
 
+.arpabet {
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+}
+
 .android-warning {
     display: none;
     background-color: #ffecb3;
@@ -1130,4 +1136,15 @@ select {
 .filter-box,
 .btn {
     display: none;
+}
+.loading {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+.error {
+    text-align: center;
+    color: #f44336;
+    font-weight: bold;
 }
