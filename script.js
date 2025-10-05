@@ -1,4 +1,3 @@
-
 // ===== FIREBASE INITIALIZATION =====
 // Firebase configuration
 const firebaseConfig = {
@@ -292,7 +291,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const signInButton = document.getElementById('signInButton');
     const signOutButton = document.getElementById('signOutButton');
 
-
     // Check if Android device
     const isAndroid = /Android/i.test(navigator.userAgent);
     if (isAndroid) {
@@ -518,28 +516,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
 
-
-                recognition.onerror = function(event) {
-                    console.error('Speech recognition error', event.error);
-                    recognitionStatus.textContent = 'Error: ' + event.error;
-                    stopRecognition();
-                    
-                    // Reset after a delay
-                    setTimeout(() => {
-                        recognitionStatus.classList.remove('active');
-                    }, 2000);
-                };
-
-                recognition.onend = function() {
-                    stopRecognition();
-                    recognitionStatus.textContent = 'Speech recognition ended';
-                    
-                    // Hide status after a delay
-                    setTimeout(() => {
-                        recognitionStatus.classList.remove('active');
-                    }, 2000);
-                };
-            }
         recognition.onerror = function(event) {
             console.error('Speech recognition error', event.error);
             recognitionStatus.textContent = 'Error: ' + event.error;
@@ -561,7 +537,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 2000);
         };
     }
-
 
     // Start speech recognition
     function startRecognition() {
@@ -1370,7 +1345,6 @@ document.addEventListener('DOMContentLoaded', function () {
             autoCorrectBtn.disabled = false;
         }
     }
-
     function saveReadToHistory(text) {
         if (!currentUser) {
             console.log("User not logged in, cannot save history");
@@ -1533,7 +1507,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-
     // Event listeners
     autoCorrectBtn.addEventListener('click', async () => {
         const text = inputText.value.trim();
@@ -1541,9 +1514,6 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('Please enter some text to process.');
             return;
         }
-     
-        processTextWithPrompt(text);
-    });
 
         const result = await processTextWithPrompt(text);
 
@@ -1555,7 +1525,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Event listeners
-
     jumpButtons.forEach(button => {
         button.addEventListener('click', () => {
             const words = parseInt(button.getAttribute('data-words'));
@@ -1588,9 +1557,6 @@ document.addEventListener('DOMContentLoaded', function () {
         microphoneBtn.addEventListener('click', toggleRecognition);
     }
 
-
-    // Initialize button states
-    updateButtonStates();
     // Initialize authentication
     initAuth();
 
@@ -1599,7 +1565,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setupPublishHandler(); 
     loadCommunityReads();
-
 });
-});
-
